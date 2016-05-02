@@ -144,6 +144,7 @@ bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t hal
                 erase_start = get_flash_page_address(dest);
                 erase_end = erase_start + (FLASH_PAGE_SIZE)/sizeof(uint16_t);
                 flash_erase_page((uint32_t)erase_start);
+            }
             flash_program_half_word((uint32_t)dest, *data);
             erase_start = dest + 1;
             if (*dest != *data) {
