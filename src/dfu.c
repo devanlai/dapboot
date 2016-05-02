@@ -52,18 +52,6 @@ static GenericCallback dfu_manifest_request_callback = NULL;
 static StateChangeCallback dfu_state_change_callback = NULL;
 static StatusChangeCallback dfu_status_change_callback = NULL;
 
-static void print_hex(uint32_t x) {
-    int i;
-    const char* hex_map = "0123456789ABCDEF";
-    char buf[9];
-    for (i=7; i >= 0; i--) {
-        uint8_t nibble = (uint8_t)((x >> (i*4)) & 0x0F);
-        buf[7-i] = hex_map[nibble];
-    }
-    buf[8] = '\0';
-    target_log(buf);
-}
-
 static inline void dfu_set_state(enum dfu_state state) {
     if (state != current_dfu_state) {
         if (dfu_state_change_callback) {
@@ -108,14 +96,6 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
 
     const uint16_t* data = (uint16_t*)dfu_download_buffer;
     uint16_t* dest = (uint16_t*)(APP_BASE_ADDRESS + current_dfu_offset);
-
-    {
-        target_log("0x");
-        print_hex((uint32_t)dest);
-        target_log(" D 0x");
-        print_hex(dfu_download_size);
-        target_log(" bytes\r\n");
-    }
 
     target_flash_unlock();
     bool ok = target_flash_program_array(dest, data, dfu_download_size/2, true);
@@ -297,7 +277,7 @@ void dfu_setup(usbd_device* usbd_dev,
     dfu_manifest_request_callback = on_manifest_request;
     dfu_state_change_callback = on_state_change;
     dfu_status_change_callback = on_status_change;
-    
+
     usbd_register_set_config_callback(usbd_dev, dfu_set_config);
     current_dfu_state = STATE_DFU_IDLE;
     current_dfu_status = DFU_STATUS_OK;

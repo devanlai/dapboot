@@ -53,55 +53,6 @@ static void jump_to_application(void) {
     while (1);
 }
 
-static void log_state_change(enum dfu_state state) {
-    const char* str = "";
-    switch (state) {
-        case STATE_APP_IDLE:                str = "appIDLE"; break;
-        case STATE_APP_DETACH:              str = "appDETACH"; break;
-        case STATE_DFU_IDLE:                str = "dfuIDLE"; break;
-        case STATE_DFU_DNLOAD_SYNC:         str = "dfuDNLOAD-SYNC"; break;
-        case STATE_DFU_DNBUSY:              str = "dfuDNBUSY"; break;
-        case STATE_DFU_DNLOAD_IDLE:         str = "dfuDNLOAD-IDLE"; break;
-        case STATE_DFU_MANIFEST_SYNC:       str = "dfuMANIFEST-SYNC"; break;
-        case STATE_DFU_MANIFEST:            str = "dfuMANIFEST"; break;
-        case STATE_DFU_MANIFEST_WAIT_RESET: str = "dfuMANIFEST-WAIT-RESET"; break;
-        case STATE_DFU_UPLOAD_IDLE:         str = "dfuUPLOAD-IDLE"; break;
-        case STATE_DFU_ERROR:               str = "dfuERROR"; break;
-        default:                            str = "UNKNOWN"; break;
-    }
-
-    target_log("state=");
-    target_log(str);
-    target_log("\r\n");
-}
-
-static void log_status_change(enum dfu_status status) {
-    const char* str = "";
-    switch (status) {
-        case DFU_STATUS_OK:                 str = "OK"; break;
-        case DFU_STATUS_ERR_TARGET:         str = "errTARGET"; break;
-        case DFU_STATUS_ERR_FILE:           str = "errFILE"; break;
-        case DFU_STATUS_ERR_WRITE:          str = "errWRITE"; break;
-        case DFU_STATUS_ERR_ERASE:          str = "errERASE"; break;
-        case DFU_STATUS_ERR_CHECK_ERASED:   str = "errCHECK_ERASED"; break;
-        case DFU_STATUS_ERR_PROG:           str = "errPROG"; break;
-        case DFU_STATUS_ERR_VERIFY:         str = "errVERIFY"; break;
-        case DFU_STATUS_ERR_ADDRESS:        str = "errADDRESS"; break;
-        case DFU_STATUS_ERR_NOTDONE:        str = "errNOTDONE"; break;
-        case DFU_STATUS_ERR_FIRMWARE:       str = "errFIRMWARE"; break;
-        case DFU_STATUS_ERR_VENDOR:         str = "errVENDOR"; break;
-        case DFU_STATUS_ERR_USBR:           str = "errUSBR"; break;
-        case DFU_STATUS_ERR_POR:            str = "errPOR"; break;
-        case DFU_STATUS_ERR_UNKNOWN:        str = "errUNKNOWN"; break;
-        case DFU_STATUS_ERR_STALLEDPKT:     str = "errSTALLEDPKT"; break;
-        default:                            str = "UNKNOWN"; break;
-    }
-
-    target_log("status=");
-    target_log(str);
-    target_log("\r\n");
-}
-
 int main(void) {
     /* Setup clocks */
     target_clock_setup();
@@ -109,8 +60,6 @@ int main(void) {
     /* Initialize GPIO/LEDs if needed */
     target_gpio_setup();
 
-    target_log("Hello World\r\n");
-    
     if (target_get_force_bootloader() || !validate_application()) {
         /* Setup USB */
         {
@@ -121,7 +70,7 @@ int main(void) {
         }
 
         usbd_device* usbd_dev = usb_setup();
-        dfu_setup(usbd_dev, &target_manifest_app, &log_state_change, &log_status_change);
+        dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
 
         while (1) {
             usbd_poll(usbd_dev);
