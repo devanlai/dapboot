@@ -48,9 +48,12 @@ size: $(OBJS) $(BINARY).elf
 	@$(PREFIX)-size $(OBJS) $(BINARY).elf
 
 debug: $(BINARY).elf
-	-$(GDB) --tui --eval "target remote | openocd -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) -f debug.cfg" $(BINARY).elf
+	-$(GDB) --tui --eval "target remote | $(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) -f debug.cfg" $(BINARY).elf
 
-.PHONY += debug size dfuse-flash
+erase:
+	$(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) -c "init" -c "reset init" -c "flash erase_sector 0 0 last" -c "reset" -c "shutdown"
+
+.PHONY += debug size dfuse-flash erase
 
 OBJS := $(sort $(OBJS))
 
