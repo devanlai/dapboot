@@ -128,12 +128,24 @@ void target_flash_lock(void) {
     flash_lock();
 }
 
+static inline uint16_t* get_flash_page_address(uint16_t* dest) {
+    return (uint16_t*)(((uint32_t)dest / FLASH_PAGE_SIZE) * FLASH_PAGE_SIZE);
+}
+static uint16_t* erase_start;
+static uint16_t* erase_end;
 bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t half_word_count, bool verify) {
     bool verified = true;
 
+    /* Remember the bounds of erased data in the current page */
+
     if (verify) {
         while (half_word_count > 0) {
+            if (dest >= erase_end || dest < erase_start) {
+                erase_start = get_flash_page_address(dest);
+                erase_end = erase_start + (FLASH_PAGE_SIZE)/sizeof(uint16_t);
+                flash_erase_page((uint32_t)erase_start);
             flash_program_half_word((uint32_t)dest, *data);
+            erase_start = dest + 1;
             if (*dest != *data) {
                 verified = false;
                 break;
@@ -144,7 +156,13 @@ bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t hal
         }
     } else {
         while (half_word_count > 0) {
+            if (dest >= erase_end || dest < erase_start) {
+                erase_start = get_flash_page_address(dest);
+                erase_end = erase_start + (FLASH_PAGE_SIZE)/sizeof(uint16_t);
+                flash_erase_page((uint32_t)erase_start);
+            }
             flash_program_half_word((uint32_t)dest, *data);
+            erase_start = dest + 1;
             dest++;
             data++;
             half_word_count--;
