@@ -1,0 +1,17 @@
+# ignore GNU global files
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+
+# ignore build artifacts
+*.d
+*.o
+*.bin
+*.hex
+*.elf
+*.axf
+*.map
+
+# ignore local makefile settings
+src/local.mk
