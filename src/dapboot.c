@@ -23,6 +23,7 @@
 #include "target.h"
 #include "usb_conf.h"
 #include "dfu.h"
+#include "webusb.h"
 #include "config.h"
 
 static inline void __set_MSP(uint32_t topOfMainStack) {
@@ -53,6 +54,11 @@ static void jump_to_application(void) {
     while (1);
 }
 
+static const char* https_urls[] = {
+    "devanlai.github.io/webdfu/dfu-util/",
+    "localhost:8000"
+};
+
 int main(void) {
     /* Setup clocks */
     target_clock_setup();
@@ -71,7 +77,8 @@ int main(void) {
 
         usbd_device* usbd_dev = usb_setup();
         dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
-
+        webusb_setup(usbd_dev,
+                     https_urls, sizeof(https_urls)/sizeof(https_urls[0]));
         while (1) {
             usbd_poll(usbd_dev);
         }

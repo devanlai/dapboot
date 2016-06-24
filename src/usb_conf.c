@@ -23,13 +23,14 @@
 #include <libopencm3/usb/dfu.h>
 #include "target.h"
 #include "dfu.h"
+#include "webusb.h"
 
 #include "usb_conf.h"
 
 static const struct usb_device_descriptor dev = {
     .bLength = USB_DT_DEVICE_SIZE,
     .bDescriptorType = USB_DT_DEVICE,
-    .bcdUSB = 0x0200,
+    .bcdUSB = 0x0210,
     .bDeviceClass = 0,
     .bDeviceSubClass = 0,
     .bDeviceProtocol = 0,
@@ -81,6 +82,18 @@ static const struct usb_config_descriptor config = {
     .interface = interfaces,
 };
 
+static const struct usb_device_capability_descriptor* capabilities[] = {
+    (const struct usb_device_capability_descriptor*)&webusb_platform,
+};
+
+static const struct usb_bos_descriptor bos = {
+    .bLength = USB_DT_BOS_SIZE,
+    .bDescriptorType = USB_DT_BOS,
+    .wTotalLength = USB_DT_BOS_SIZE + sizeof(webusb_platform),
+    .bNumDeviceCaps = sizeof(capabilities)/sizeof(capabilities[0]),
+    .capabilities = capabilities
+};
+
 static char serial_number[USB_SERIAL_NUM_LENGTH+1] = "000000000000000000000000";
 
 static const char *usb_strings[] = {
@@ -105,7 +118,7 @@ usbd_device* usb_setup(void) {
     int num_strings = sizeof(usb_strings)/sizeof(const char*);
 
     const usbd_driver* driver = target_usb_init();
-    usbd_device* usbd_dev = usbd_init(driver, &dev, &config,
+    usbd_device* usbd_dev = usbd_init(driver, &dev, &config, &bos,
                                       usb_strings, num_strings,
                                       usbd_control_buffer, sizeof(usbd_control_buffer));
 
