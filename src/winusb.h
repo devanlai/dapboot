@@ -16,10 +16,15 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef CONFIG_H_INCLUDED
-#define CONFIG_H_INCLUDED
+#ifndef WINUSB_H_INCLUDED
+#define WINUSB_H_INCLUDED
 
-#define APP_BASE_ADDRESS 0x08003000
-#define FLASH_PAGE_SIZE  1024
+#include "winusb_defs.h"
+
+/* Arbitrary, but must be equivalent to the last character in
+   the special OS descriptor string */
+#define WINUSB_MS_VENDOR_CODE 0x21
+
+extern void winusb_setup(usbd_device* usbd_dev);
 
 #endif

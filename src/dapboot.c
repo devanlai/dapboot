@@ -24,6 +24,7 @@
 #include "usb_conf.h"
 #include "dfu.h"
 #include "webusb.h"
+#include "winusb.h"
 #include "config.h"
 
 static inline void __set_MSP(uint32_t topOfMainStack) {
@@ -79,6 +80,8 @@ int main(void) {
         dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
         webusb_setup(usbd_dev,
                      https_urls, sizeof(https_urls)/sizeof(https_urls[0]));
+        winusb_setup(usbd_dev);
+        
         while (1) {
             usbd_poll(usbd_dev);
         }
