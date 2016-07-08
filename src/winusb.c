@@ -21,17 +21,22 @@
 
 #include "usb_conf.h"
 
-static const struct winusb_compatible_id_feature_descriptor winusb_compatible_id_descriptor = {
-    .dwLength = sizeof(struct winusb_compatible_id_feature_descriptor),
+static const struct winusb_compatible_id_descriptor winusb_wcid = {
+    .dwLength = (WINUSB_COMPATIBLE_ID_HEADER_SIZE +
+                 1*WINUSB_COMPATIBLE_ID_FUNCTION_SECTION_SIZE),
     .bcdVersion = 0x0100,
     .wIndex = 0x0004,
     .bNumSections = 1,
-    .reserved0 = { 0, 0, 0, 0, 0, 0, 0 },
-    .bInterfaceNumber = 0,
-    .reserved1 = { 1 },
-    .compatibleId = "WINUSB",
-    .subCompatibleId = "",
-    .reserved2 = { 0, 0, 0, 0, 0, 0}
+    .reserved = { 0, 0, 0, 0, 0, 0, 0 },
+    .functions = {
+        {
+            .bInterfaceNumber = 0,
+            .reserved0 = { 1 },
+            .compatibleId = "WINUSB",
+            .subCompatibleId = "",
+            .reserved1 = { 0, 0, 0, 0, 0, 0}
+        },
+    }
 };
 
 static int winusb_control_vendor_request(usbd_device *usbd_dev,
@@ -48,9 +53,9 @@ static int winusb_control_vendor_request(usbd_device *usbd_dev,
     int status = USBD_REQ_NOTSUPP;
     if (((req->bmRequestType & USB_REQ_TYPE_RECIPIENT) == USB_REQ_TYPE_DEVICE) &&
         (req->wIndex == WINUSB_REQ_GET_COMPATIBLE_ID_FEATURE_DESCRIPTOR)) {
-        *buf = (uint8_t*)(&winusb_compatible_id_descriptor);
-        if (*len > sizeof(winusb_compatible_id_descriptor)) {
-            *len = sizeof(winusb_compatible_id_descriptor);
+        *buf = (uint8_t*)(&winusb_wcid);
+        if (*len > winusb_wcid.dwLength) {
+            *len = winusb_wcid.dwLength;
         }
         status = USBD_REQ_HANDLED;
     } else if (((req->bmRequestType & USB_REQ_TYPE_RECIPIENT) == USB_REQ_TYPE_INTERFACE) &&
