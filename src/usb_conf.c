@@ -94,7 +94,7 @@ static const struct usb_bos_descriptor bos = {
     .capabilities = capabilities
 };
 
-static char serial_number[USB_SERIAL_NUM_LENGTH+1] = "000000000000000000000000";
+static char serial_number[USB_SERIAL_NUM_LENGTH+1];
 
 static const char *usb_strings[] = {
     "Devanarchy",

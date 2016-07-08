@@ -98,7 +98,7 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
     uint16_t* dest = (uint16_t*)(APP_BASE_ADDRESS + current_dfu_offset);
 
     target_flash_unlock();
-    bool ok = target_flash_program_array(dest, data, dfu_download_size/2, true);
+    bool ok = target_flash_program_array(dest, data, dfu_download_size/2);
     target_flash_lock();
 
     if (ok) {

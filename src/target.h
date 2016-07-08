@@ -34,5 +34,5 @@ extern void target_relocate_vector_table(void);
 extern void target_manifest_app(void);
 extern void target_flash_unlock(void);
 extern void target_flash_lock(void);
-extern bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t half_word_count, bool verify);
+extern bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t half_word_count);
 #endif
