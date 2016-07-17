@@ -26,17 +26,13 @@ DFU_UTIL = dfu-util
 BOOT_VID_PID := 1209:0001
 
 SRCS := $(wildcard *.c)
-SRCS += $(wildcard $(TARGET_DIR)/*.c)
+SRCS += $(wildcard $(TARGET_COMMON_DIR)/*.c)
+SRCS += $(wildcard $(TARGET_SPEC_DIR)/*.c)
 
 OBJS += $(SRCS:.c=.o)
 DEPS  = $(SRCS:.c=.d)
 
 .DEFAULT_GOAL := $(BINARY).bin
-
-%.dfuse-flash: %.bin
-	$(DFU_UTIL) -d $(BOOT_VID_PID) -a 0 -s 0x08000000:leave -D $(<)
-
-dfuse-flash: $(BINARY).dfuse-flash
 
 clean::
 	@rm -f $(OBJS)
@@ -53,7 +49,7 @@ debug: $(BINARY).elf
 erase:
 	$(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) -c "init" -c "reset init" -c "flash erase_sector 0 0 last" -c "reset" -c "shutdown"
 
-.PHONY += debug size dfuse-flash erase
+.PHONY += debug size erase
 
 OBJS := $(sort $(OBJS))
 
@@ -61,4 +57,5 @@ OBJS := $(sort $(OBJS))
 CPPFLAGS += -I.
 
 # Add target config directory to the header search path
-CPPFLAGS += -I$(TARGET_DIR)/
+CPPFLAGS += -I$(TARGET_COMMON_DIR)/
+CPPFLAGS += -I$(TARGET_SPEC_DIR)/

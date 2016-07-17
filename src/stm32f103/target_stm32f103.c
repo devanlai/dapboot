@@ -16,7 +16,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* STM32F103-specific target functions */
+/* Common STM32F103 target functions */
 
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
@@ -28,7 +28,22 @@
 #include "target.h"
 #include "config.h"
 #include "backup.h"
-#define LED_OPEN_DRAIN 0
+
+#ifndef USES_GPIOA
+#if (HAVE_USB_PULLUP_CONTROL == 0)
+#define USES_GPIOA 1
+#else
+#define USES_GPIOA 0
+#endif
+#endif
+
+#ifndef USES_GPIOB
+#define USES_GPIOB 0
+#endif
+
+#ifndef USES_GPIOC
+#define USES_GPIOC 0
+#endif
 
 static const uint32_t CMD_BOOT = 0x544F4F42UL;
 
@@ -38,31 +53,73 @@ void target_clock_setup(void) {
 }
 
 void target_gpio_setup(void) {
-    /*
-      LED0 on PA9
-    */
-
-    /* Enable GPIOA clock */
-    rcc_periph_clock_enable(RCC_GPIOA);
+    /* Enable GPIO clocks */
+    if (USES_GPIOA) {
+        rcc_periph_clock_enable(RCC_GPIOA);
+    }
+    if (USES_GPIOB) {
+        rcc_periph_clock_enable(RCC_GPIOB);
+    }
+    if (USES_GPIOC) {
+        rcc_periph_clock_enable(RCC_GPIOC);
+    }
 
     /* Setup LEDs */
-    const uint8_t mode = GPIO_MODE_OUTPUT_10_MHZ;
-    const uint8_t conf = (LED_OPEN_DRAIN ? GPIO_CNF_OUTPUT_OPENDRAIN
-                                         : GPIO_CNF_OUTPUT_PUSHPULL);
-    gpio_set_mode(GPIOA, mode, conf, GPIO9);
+#if HAVE_LED
+    {
+        const uint8_t mode = GPIO_MODE_OUTPUT_10_MHZ;
+        const uint8_t conf = (LED_OPEN_DRAIN ? GPIO_CNF_OUTPUT_OPENDRAIN
+                                             : GPIO_CNF_OUTPUT_PUSHPULL);
+        if (LED_OPEN_DRAIN) {
+            gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
+        } else {
+            gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
+        }
+        gpio_set_mode(LED_GPIO_PORT, mode, conf, LED_GPIO_PIN);
+    }
+#endif
+
+#if HAVE_USB_PULLUP_CONTROL
+    {
+        const uint8_t mode = GPIO_MODE_OUTPUT_10_MHZ;
+        const uint8_t conf = (USB_PULLUP_OPEN_DRAIN ? GPIO_CNF_OUTPUT_OPENDRAIN
+                                                    : GPIO_CNF_OUTPUT_PUSHPULL);
+        /* Configure USB pullup transistor, initially disabled */
+        if (USB_PULLUP_ACTIVE_HIGH) {
+            gpio_clear(USB_PULLUP_GPIO_PORT, USB_PULLUP_GPIO_PIN);
+        } else {
+            gpio_set(USB_PULLUP_GPIO_PORT, USB_PULLUP_GPIO_PIN);
+        }
+        gpio_set_mode(USB_PULLUP_GPIO_PORT, mode, conf, USB_PULLUP_GPIO_PIN);
+    }
+#else
+    {
+        /* Drive the USB DP pin to override the pull-up */
+        gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_10_MHZ,
+                      GPIO_CNF_OUTPUT_PUSHPULL, GPIO12);
+    }
+#endif
 }
 
 const usbd_driver* target_usb_init(void) {
     rcc_periph_reset_pulse(RST_USB);
 
-    rcc_periph_clock_enable(RCC_GPIOA);
-    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_10_MHZ,
-                  GPIO_CNF_OUTPUT_PUSHPULL, GPIO12);
+#if HAVE_USB_PULLUP_CONTROL
+    /* Enable USB pullup to connect */
+    if (USB_PULLUP_ACTIVE_HIGH) {
+        gpio_set(USB_PULLUP_GPIO_PORT, USB_PULLUP_GPIO_PIN);
+    } else {
+        gpio_clear(USB_PULLUP_GPIO_PORT, USB_PULLUP_GPIO_PIN);
+    }
+#else
+    /* Override hard-wired USB pullup to disconnect and reconnect */
     gpio_clear(GPIOA, GPIO12);
     int i;
-    for (i = 0; i < 800000; i++)
+    for (i = 0; i < 800000; i++) {
         __asm__("nop");
-    
+    }
+#endif
+
     return &st_usbfs_v1_usb_driver;
 }
 
@@ -73,10 +130,23 @@ bool target_get_force_bootloader(void) {
     if (cmd == CMD_BOOT) {
         force = true;
     }
-    
+
     /* Clear the RTC backup register */
     backup_write(BKP0, 0);
-    
+
+#if HAVE_BUTTON
+    /* Check if the user button is held down */
+    if (BUTTON_ACTIVE_HIGH) {
+        if (gpio_get(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN)) {
+            force = true;
+        }
+    } else {
+        if (!gpio_get(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN)) {
+            force = true;
+        }
+    }
+#endif
+
     return force;
 }
 
