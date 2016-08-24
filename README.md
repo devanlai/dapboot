@@ -21,7 +21,7 @@ Local makefile settings can be set by creating a `local.mk`, which is automatica
 The bootloader can be built to look for arbitrary patterns, but the default for the STM32F103 target looks for a magic value stored in the RTC backup registers. Writing the magic value and then resetting will run the bootloader instead of the main application.
 
 ## USB VID/PID
-The USB VID/PID pair is currently set to the [pid.codes](http://pid.codes/) test PID of [1209/0001](http://pid.codes/1209/0001/). This firmware should not be put into production without changing the VID/PID first.
+The USB VID/PID pair ([1209/DB42](http://pid.codes/1209/DB42/)) is allocated through the [pid.codes](http://pid.codes/) open-source USB PID program.
 
 ## Licensing
 All contents of the dapboot project are licensed under terms that are compatible with the terms of the GNU Lesser General Public License version 3.
