@@ -31,8 +31,10 @@ static inline void __set_MSP(uint32_t topOfMainStack) {
     asm("msr msp, %0" : : "r" (topOfMainStack));
 }
 
+extern volatile const vector_table_t vector_table;
+
 bool validate_application(void) {
-    if ((*(volatile uint32_t *)APP_BASE_ADDRESS & 0x2FFE0000) == 0x20000000) {
+    if (((uint32_t)(vector_table.reserved_x001c[0]) & 0x2FFE0000) == 0x20000000) {
         return true;
     }
     return false;
@@ -41,17 +43,12 @@ bool validate_application(void) {
 static void jump_to_application(void) __attribute__ ((noreturn));
 
 static void jump_to_application(void) {
-    vector_table_t* app_vector_table = (vector_table_t*)APP_BASE_ADDRESS;
-    
-    /* Use the application's vector table */
-    target_relocate_vector_table();
-
     /* Initialize the application's stack pointer */
-    __set_MSP((uint32_t)(app_vector_table->initial_sp_value));
+    __set_MSP((uint32_t)(vector_table.reserved_x001c[0]));
 
     /* Jump to the application entry point */
-    app_vector_table->reset();
-    
+    vector_table.reserved_x001c[1]();
+
     while (1);
 }
 
