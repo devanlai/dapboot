@@ -1,13 +1,24 @@
 # dapboot
 The dapboot project is an open-source USB [Device Firmware Upgrade](http://www.usb.org/developers/docs/devclass_docs/DFU_1.1.pdf) (DFU) bootloader for STM32 devices.
 
-Currently, the only target officially supported is the STM32F103x chip on STLink/v2 compatible boards.
+Currently, the only targets officially supported are the STM32F103x series.
 
 ## Build instructions
-As only one target is really in use, invoking `make` will build a binary for the STM32F103. The more general usage is:
+The default target is a generic STM32F103 dev board with an LED on PC13, commonly referred to as a "bluepill" board.
+
+To build other targets, you can override the
+`TARGET` variable when invoking `make`.
 
     make clean
-    make TARGET=STM32F103
+    make TARGET=STLINK
+
+### Targets
+
+| Target Name | Description | Link |
+| ----------- | ----------- |----- |
+|`BLUEPILL`   | Cheap dev board | http://wiki.stm32duino.com/index.php?title=Blue_Pill |
+|`MAPLEMINI`  | LeafLabs Maple Mini board and clone derivatives | https://github.com/rogerclarkmelbourne/Arduino_STM32/wiki/Maple-and-Maple-mini |
+|`STLINK`     | STLink/v2 hardware clones | https://wiki.paparazziuav.org/wiki/STLink#Clones |
 
 ## Flash instructions
 The `make flash` target will use openocd to upload the bootloader to an attached board. By default, the Makefile assumes you're using a [CMSIS-DAP](http://www.arm.com/products/processors/cortex-m/cortex-microcontroller-software-interface-standard.php) based probe, but you can override this by overriding `OOCD_INTERFACE` variable. For example:
@@ -17,8 +28,22 @@ The `make flash` target will use openocd to upload the bootloader to an attached
 ## Overriding defaults
 Local makefile settings can be set by creating a `local.mk`, which is automatically included.
 
-## Switching to the bootloader
+Here is an example `local.mk` that changes the default target to the STLink/v2 and uses an unmodified STLink/v2 to flash it.
+
+    TARGET ?= STLINK
+    OOCD_INTERFACE ?= interface/stlink-v2.cfg
+
+## Using the bootloader
+### Building for the bootloader
+For regular dapboot builds, the bootloader occupies the lower 8KiB of flash, so your
+application must offset its flash contents by 8KiB. This can be done by modifying your linker script or flags as appropriate.
+
+For the experimental bootloader on this branch, the bootloader occupies the upper 8KiB of flash, so the application does not need to be offset.
+
+### Switching to the bootloader
 The bootloader can be built to look for arbitrary patterns, but the default for the STM32F103 target looks for a magic value stored in the RTC backup registers. Writing the magic value and then resetting will run the bootloader instead of the main application.
+
+The bootloader currently looks for `0x544F` in RTC backup register 1 and `0x4F42` in RTC backup register 0 (together they spell "BOOT" in ASCII).
 
 ## USB VID/PID
 The USB VID/PID pair ([1209/DB42](http://pid.codes/1209/DB42/)) is allocated through the [pid.codes](http://pid.codes/) open-source USB PID program.
