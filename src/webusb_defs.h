@@ -51,7 +51,7 @@ struct webusb_url_descriptor {
     uint8_t bLength;
     uint8_t bDescriptorType;
     uint8_t bScheme;
-    const char URL[];
+    char URL[];
 } __attribute__((packed));
 
 #define WEBUSB_DT_URL_DESCRIPTOR_SIZE 3
