@@ -45,10 +45,7 @@ The bootloader can be built to look for arbitrary patterns, but the default for 
 The bootloader currently looks for `0x544F` in RTC backup register 1 and `0x4F42` in RTC backup register 0 (together they spell "BOOT" in ASCII).
 
 ### WebUSB
-This bootloader implements the draft [WebUSB](https://wicg.github.io/webusb/) specification, which allows whitelisted origins to access the bootloader (with explicit user approval) on the following https origins:
-
- * https://devanlai.github.io/
- * https://localhost:8000/
+This bootloader implements the draft [WebUSB](https://wicg.github.io/webusb/) specification, which allows web pages to access the bootloader (after presenting the user with a device picker dialog).
 
 For a demo implementing dfu-util features in the browser, see https://devanlai.github.io/webdfu/dfu-util/
 
