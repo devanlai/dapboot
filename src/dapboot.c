@@ -55,11 +55,6 @@ static void jump_to_application(void) {
     while (1);
 }
 
-static const char* https_urls[] = {
-    "devanlai.github.io/webdfu/dfu-util/",
-    "localhost:8000"
-};
-
 int main(void) {
     /* Setup clocks */
     target_clock_setup();
@@ -78,8 +73,7 @@ int main(void) {
 
         usbd_device* usbd_dev = usb_setup();
         dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
-        webusb_setup(usbd_dev,
-                     https_urls, sizeof(https_urls)/sizeof(https_urls[0]));
+        webusb_setup(usbd_dev, "devanlai.github.io/webdfu/dfu-util/");
         winusb_setup(usbd_dev);
         
         while (1) {

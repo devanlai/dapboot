@@ -21,12 +21,8 @@
 
 #include <stdint.h>
 
-#define WEBUSB_REQ_GET_ALLOWED_ORIGINS 0x01
 #define WEBUSB_REQ_GET_URL             0x02
 
-#define WEBUSB_DT_DESCRIPTOR_SET_HEADER 0
-#define WEBUSB_DT_CONFIGURATION_SUBSET_HEADER 1
-#define WEBUSB_DT_FUNCTION_SUBSET_HEADER 2
 #define WEBUSB_DT_URL 3
 
 #define WEBUSB_URL_SCHEME_HTTP 0
@@ -55,55 +51,5 @@ struct webusb_url_descriptor {
 } __attribute__((packed));
 
 #define WEBUSB_DT_URL_DESCRIPTOR_SIZE 3
-
-struct webusb_function_subset_header {
-    uint8_t bLength;
-    uint8_t bDescriptorType;
-    uint8_t bFirstInterfaceNumber;
-    uint8_t iOrigin[];
-} __attribute__((packed));
-
-#define WEBUSB_FUNCTION_SUBSET_HEADER_SIZE 3
-
-struct webusb_configuration_subset_header {
-    uint8_t bLength;
-    uint8_t bDescriptorType;
-    uint8_t bConfigurationValue;
-    uint8_t bNumFunctions;
-    uint8_t iOrigin[];
-} __attribute__((packed));
-
-#define WEBUSB_CONFIGURATION_SUBSET_HEADER_SIZE 4
-
-struct webusb_allowed_origins_header {
-    uint8_t bLength;
-    uint8_t bDescriptorType;
-    uint16_t wTotalLength;
-    uint8_t bNumConfigurations;
-    uint8_t iOrigin[];
-} __attribute__((packed));
-
-struct webusb_simple_origins {
-    struct {
-        uint8_t bLength;
-        uint8_t bDescriptorType;
-        uint16_t wTotalLength;
-        uint8_t bNumConfigurations;
-    } __attribute__((packed)) allowed_origins_header;
-    struct {
-        uint8_t bLength;
-        uint8_t bDescriptorType;
-        uint8_t bConfigurationValue;
-        uint8_t bNumFunctions;
-    } __attribute__((packed)) configuration_subset_header;
-    struct  {
-        uint8_t bLength;
-        uint8_t bDescriptorType;
-        uint8_t bFirstInterfaceNumber;
-    } __attribute__((packed)) function_subset_header;
-    uint8_t iOrigin[16];
-} __attribute__((packed));
-
-#define WEBUSB_ALLOWED_ORIGINS_HEADER_SIZE 5
 
 #endif

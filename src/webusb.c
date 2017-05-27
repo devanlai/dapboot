@@ -34,8 +34,7 @@ const struct webusb_platform_descriptor webusb_platform = {
     .iLandingPage = 1
 };
 
-static const char** webusb_https_urls;
-static size_t webusb_num_https_urls;
+const char* webusb_landing_url;
 
 static int webusb_control_vendor_request(usbd_device *usbd_dev,
                                      struct usb_setup_data *req,
@@ -50,70 +49,18 @@ static int webusb_control_vendor_request(usbd_device *usbd_dev,
 
     int status = USBD_REQ_NOTSUPP;
     switch (req->wIndex) {
-        case WEBUSB_REQ_GET_ALLOWED_ORIGINS: {
-            static struct webusb_simple_origins origins = {
-                .allowed_origins_header = {
-                    .bLength = WEBUSB_ALLOWED_ORIGINS_HEADER_SIZE,
-                    .bDescriptorType = WEBUSB_DT_DESCRIPTOR_SET_HEADER,
-                    .bNumConfigurations = 1,
-                },
-                .configuration_subset_header = {
-                    .bLength = WEBUSB_CONFIGURATION_SUBSET_HEADER_SIZE,
-                    .bDescriptorType = WEBUSB_DT_CONFIGURATION_SUBSET_HEADER,
-                    .bConfigurationValue = 1,
-                    .bNumFunctions = 1,
-                },
-                .function_subset_header = {
-                    .bDescriptorType = WEBUSB_DT_FUNCTION_SUBSET_HEADER,
-                    .bFirstInterfaceNumber = INTF_DFU,
-                },
-            };
-
-            size_t i;
-            size_t num_origins = webusb_num_https_urls;
-            if (num_origins > sizeof(origins.iOrigin)/sizeof(origins.iOrigin[0])) {
-                num_origins = sizeof(origins.iOrigin)/sizeof(origins.iOrigin[0]);
-            }
-            
-            for (i=0; i < num_origins; i++) {
-                origins.iOrigin[i] = i+1;
-            }
-
-            origins.allowed_origins_header.wTotalLength = (WEBUSB_ALLOWED_ORIGINS_HEADER_SIZE
-                                                           + WEBUSB_CONFIGURATION_SUBSET_HEADER_SIZE
-                                                           + WEBUSB_FUNCTION_SUBSET_HEADER_SIZE + num_origins);
-            origins.function_subset_header.bLength = WEBUSB_FUNCTION_SUBSET_HEADER_SIZE + num_origins;
-            
-            if (*len > origins.allowed_origins_header.wTotalLength) {
-                *len = origins.allowed_origins_header.wTotalLength;
-            }
-            
-            *buf = (uint8_t*)&origins;
-            status = USBD_REQ_HANDLED;
-            break;
-        }
         case WEBUSB_REQ_GET_URL: {
+            if (req->wValue != 1) {
+                break;
+            }
             struct webusb_url_descriptor* url = (struct webusb_url_descriptor*)(*buf);
-            uint16_t index = req->wValue;
-            if (index == 0) {
-                return USBD_REQ_NOTSUPP;
-            }
-
-            // Convert from one-indexing to zero-indexing
-            index--;
-            
-            if (index < webusb_num_https_urls) {
-                size_t url_len = strlen(webusb_https_urls[index]);
-                url->bLength = WEBUSB_DT_URL_DESCRIPTOR_SIZE + url_len;
-                url->bDescriptorType = WEBUSB_DT_URL;
-                url->bScheme = WEBUSB_URL_SCHEME_HTTPS;
-                memcpy(&url->URL, webusb_https_urls[index], url_len);
-                *len = url->bLength;
-                status = USBD_REQ_HANDLED;
-            } else {
-                // TODO: stall instead?
-                status = USBD_REQ_NOTSUPP;
-            }
+            size_t url_len = strlen(webusb_landing_url);
+            url->bLength = WEBUSB_DT_URL_DESCRIPTOR_SIZE + url_len;
+            url->bDescriptorType = WEBUSB_DT_URL;
+            url->bScheme = WEBUSB_URL_SCHEME_HTTPS;
+            memcpy(&url->URL, webusb_landing_url, url_len);
+            *len = url->bLength;
+            status = USBD_REQ_HANDLED;
             break;
         }
         default: {
@@ -134,12 +81,7 @@ static void webusb_set_config(usbd_device* usbd_dev, uint16_t wValue) {
         webusb_control_vendor_request);
 }
 
-void webusb_setup(usbd_device* usbd_dev,
-                  const char** https_urls, size_t num_https_urls
-    ) {
-    webusb_https_urls = https_urls;
-
-    webusb_num_https_urls = (https_urls == NULL) ? 0 : num_https_urls;
-
+void webusb_setup(usbd_device* usbd_dev, const char* landing_page) {
+    webusb_landing_url = landing_page;
     usbd_register_set_config_callback(usbd_dev, webusb_set_config);
 }

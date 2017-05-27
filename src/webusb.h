@@ -26,6 +26,6 @@
 
 extern const struct webusb_platform_descriptor webusb_platform;
 extern void webusb_setup(usbd_device* usbd_dev,
-                         const char** https_urls, size_t num_https_urls);
+                         const char* landing_page);
 
 #endif
