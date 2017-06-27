@@ -30,7 +30,7 @@ endif
 ifeq ($(TARGET),MAPLEMINI)
 	TARGET_COMMON_DIR	:= ./stm32f103
 	TARGET_SPEC_DIR		:= ./stm32f103/maplemini
-	LDSCRIPT			:= ./stm32f103/stm32f103x8.ld
+	LDSCRIPT			:= ./stm32f103/stm32f103xB.ld
 	ARCH				= STM32F1
 endif
 ifeq ($(TARGET),STLINK)
