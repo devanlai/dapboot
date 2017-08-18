@@ -45,6 +45,11 @@
 #define USES_GPIOC 0
 #endif
 
+#ifdef FLASH_SIZE_OVERRIDE
+_Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
+               "Incompatible flash size");
+#endif
+
 static const uint32_t CMD_BOOT = 0x544F4F42UL;
 
 void target_clock_setup(void) {
@@ -154,11 +159,21 @@ void target_get_serial_number(char* dest, size_t max_chars) {
     desig_get_unique_id_as_string(dest, max_chars+1);
 }
 
-size_t target_get_max_firmware_size(void) {
-    uint8_t* flash_end = (void*)(FLASH_BASE + DESIG_FLASH_SIZE*1024);
-    uint8_t* flash_start = (void*)(APP_BASE_ADDRESS);
+static uint16_t* get_flash_end(void) {
+#ifdef FLASH_SIZE_OVERRIDE
+    /* Allow access to the unofficial full 128KiB flash size */
+    return (uint16_t*)(FLASH_BASE + FLASH_SIZE_OVERRIDE);
+#else
+    /* Only allow access to the chip's self-reported flash size */
+    return (uint16_t*)(FLASH_BASE + (size_t)DESIG_FLASH_SIZE*FLASH_PAGE_SIZE);
+#endif
+}
 
-    return (size_t)(flash_end - flash_start);
+size_t target_get_max_firmware_size(void) {
+    uint8_t* flash_end = (uint8_t*)get_flash_end();
+    uint8_t* flash_start = (uint8_t*)(APP_BASE_ADDRESS);
+
+    return (flash_end >= flash_start) ? (size_t)(flash_end - flash_start) : 0;
 }
 
 void target_relocate_vector_table(void) {
