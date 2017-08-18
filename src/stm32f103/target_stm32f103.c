@@ -176,12 +176,13 @@ void target_flash_lock(void) {
 static inline uint16_t* get_flash_page_address(uint16_t* dest) {
     return (uint16_t*)(((uint32_t)dest / FLASH_PAGE_SIZE) * FLASH_PAGE_SIZE);
 }
-static uint16_t* erase_start;
-static uint16_t* erase_end;
+
 bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t half_word_count) {
     bool verified = true;
 
     /* Remember the bounds of erased data in the current page */
+    static uint16_t* erase_start;
+    static uint16_t* erase_end;
 
     while (half_word_count > 0) {
         if (dest >= erase_end || dest < erase_start) {
