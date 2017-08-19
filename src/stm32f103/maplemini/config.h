@@ -29,10 +29,12 @@
 #define LED_GPIO_PIN  GPIO1
 #define LED_OPEN_DRAIN 0
 
-#define HAVE_BUTTON 1
-#define BUTTON_GPIO_PORT GPIOB
-#define BUTTON_GPIO_PIN  GPIO8
-#define BUTTON_ACTIVE_HIGH 1
+/* Technically, there is a button on PB8, but the button is
+   also shorted to BOOT0, so it's not very useful for us to
+   sample PB8 on boot, since pulling it high will already
+   trigger the ROM serial bootloader and prevent us from
+   running anyways. */
+#define HAVE_BUTTON 0
 
 #define HAVE_USB_PULLUP_CONTROL 1
 #define USB_PULLUP_GPIO_PORT GPIOB
