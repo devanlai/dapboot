@@ -22,9 +22,6 @@ OPENCM3_DIR = ../libopencm3
 TARGET ?= STM32F103
 include targets.mk
 
-DFU_UTIL = dfu-util
-BOOT_VID_PID := 1209:0001
-
 SRCS := $(wildcard *.c)
 SRCS += $(wildcard $(TARGET_COMMON_DIR)/*.c)
 SRCS += $(wildcard $(TARGET_SPEC_DIR)/*.c)
@@ -38,7 +35,7 @@ clean::
 	@rm -f $(OBJS)
 	@rm -f $(DEPS)
 
-include libopencm3.target.mk
+include rules.mk
 
 size: $(OBJS) $(BINARY).elf
 	@$(PREFIX)-size $(OBJS) $(BINARY).elf
