@@ -76,7 +76,7 @@ int main(void) {
 
         usbd_device* usbd_dev = usb_setup();
         dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
-        webusb_setup(usbd_dev, "devanlai.github.io/webdfu/dfu-util/");
+        webusb_setup(usbd_dev);
         winusb_setup(usbd_dev);
         
         while (1) {

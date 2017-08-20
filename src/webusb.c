@@ -16,12 +16,21 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <string.h>
-
 #include <libopencm3/usb/usbd.h>
 #include "webusb.h"
 
 #include "usb_conf.h"
+#include "config.h"
+
+#ifndef LANDING_PAGE_URL
+#define LANDING_PAGE_URL "devanlai.github.io/webdfu/dfu-util/"
+#endif
+
+#define LANDING_PAGE_DESCRIPTOR_SIZE (WEBUSB_DT_URL_DESCRIPTOR_SIZE \
+                                    + sizeof(LANDING_PAGE_URL) - 1)
+
+_Static_assert((LANDING_PAGE_DESCRIPTOR_SIZE < 256),
+               "Landing page URL is too long");
 
 const struct webusb_platform_descriptor webusb_platform = {
     .bLength = WEBUSB_PLATFORM_DESCRIPTOR_SIZE,
@@ -34,7 +43,12 @@ const struct webusb_platform_descriptor webusb_platform = {
     .iLandingPage = 1
 };
 
-const char* webusb_landing_url;
+static const struct webusb_url_descriptor landing_url_descriptor = {
+    .bLength = LANDING_PAGE_DESCRIPTOR_SIZE,
+    .bDescriptorType = WEBUSB_DT_URL,
+    .bScheme = WEBUSB_URL_SCHEME_HTTPS,
+    .URL = LANDING_PAGE_URL
+};
 
 static int webusb_control_vendor_request(usbd_device *usbd_dev,
                                      struct usb_setup_data *req,
@@ -53,13 +67,8 @@ static int webusb_control_vendor_request(usbd_device *usbd_dev,
             if (req->wValue != 1) {
                 break;
             }
-            struct webusb_url_descriptor* url = (struct webusb_url_descriptor*)(*buf);
-            size_t url_len = strlen(webusb_landing_url);
-            url->bLength = WEBUSB_DT_URL_DESCRIPTOR_SIZE + url_len;
-            url->bDescriptorType = WEBUSB_DT_URL;
-            url->bScheme = WEBUSB_URL_SCHEME_HTTPS;
-            memcpy(&url->URL, webusb_landing_url, url_len);
-            *len = url->bLength;
+            *buf = (uint8_t*)(&landing_url_descriptor);
+            *len = landing_url_descriptor.bLength;
             status = USBD_REQ_HANDLED;
             break;
         }
@@ -81,7 +90,6 @@ static void webusb_set_config(usbd_device* usbd_dev, uint16_t wValue) {
         webusb_control_vendor_request);
 }
 
-void webusb_setup(usbd_device* usbd_dev, const char* landing_page) {
-    webusb_landing_url = landing_page;
+void webusb_setup(usbd_device* usbd_dev) {
     usbd_register_set_config_callback(usbd_dev, webusb_set_config);
 }
