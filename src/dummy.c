@@ -25,6 +25,7 @@
 void target_get_serial_number(char* dest, size_t max_chars) __attribute__((weak));
 void target_log(const char* str) __attribute__((weak));
 void target_manifest_app(void) __attribute__((weak));
+void target_pre_main(void) __attribute__((weak));
 
 void target_get_serial_number(char* dest, size_t max_chars) {
     (void)max_chars;
@@ -39,4 +40,9 @@ void target_log(const char* str) {
 
 void target_manifest_app(void) {
     scb_reset_system();
+}
+
+void target_pre_main(void)
+{
+
 }
