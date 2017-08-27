@@ -44,7 +44,10 @@ debug: $(BINARY).elf
 	-$(GDB) --tui --eval "target remote | $(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) -f debug.cfg" $(BINARY).elf
 
 erase:
-	$(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) -c "init" -c "reset init" -c "flash erase_sector 0 0 last" -c "reset" -c "shutdown"
+	$(OOCD) -f $(OOCD_INTERFACE) -f $(OOCD_BOARD) \
+            -c "init" -c "reset init" \
+            -c "stm32f1x unlock 0; reset halt" \
+            -c "flash erase_sector 0 0 last" -c "reset" -c "shutdown"
 
 .PHONY += debug size erase
 
