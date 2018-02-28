@@ -1,0 +1,25 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Checkout submodules
+          command: git submodule sync && git submodule update --init
+      - restore_cache:
+          key: v1-toolchain-checksum-{{ checksum "util/install-toolchain.sh" }}
+      - run:
+          name: Install toolchain
+          command: ./util/install-toolchain.sh
+      - save_cache:
+          key: v1-toolchain-checksum-{{ checksum "util/install-toolchain.sh" }}
+          paths:
+            - "~/toolchains/"
+      - run:
+          name: Compile firmware
+          command: make -f release.Makefile -k all
+          environment:
+            PREFIX: "~/toolchains/gcc-arm-embedded/bin/arm-none-eabi"
+      - store_artifacts:
+          path: build/
