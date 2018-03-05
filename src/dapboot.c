@@ -27,6 +27,8 @@
 #include "winusb.h"
 #include "config.h"
 
+static enum dfu_state current_dfu_state;
+
 static inline void __set_MSP(uint32_t topOfMainStack) {
     asm("msr msp, %0" : : "r" (topOfMainStack));
 }
@@ -57,6 +59,10 @@ static const char* https_urls[] = {
     "localhost:8000"
 };
 
+static void state_change(enum dfu_state new_state) {
+    current_dfu_state = new_state;
+}
+
 int main(void) {
     /* Setup clocks */
     target_clock_setup();
@@ -64,25 +70,33 @@ int main(void) {
     /* Initialize GPIO/LEDs if needed */
     target_gpio_setup();
 
-    if (target_get_force_bootloader() || !validate_application()) {
-        /* Setup USB */
-        {
-            char serial[USB_SERIAL_NUM_LENGTH+1];
-            serial[0] = '\0';
-            target_get_serial_number(serial, USB_SERIAL_NUM_LENGTH);
-            usb_set_serial_number(serial);
-        }
+    /* Setup USB */
+    {
+        char serial[USB_SERIAL_NUM_LENGTH+1];
+        serial[0] = '\0';
+        target_get_serial_number(serial, USB_SERIAL_NUM_LENGTH);
+        usb_set_serial_number(serial);
+    }
 
-        usbd_device* usbd_dev = usb_setup();
-        dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
-        webusb_setup(usbd_dev,
-                     https_urls, sizeof(https_urls)/sizeof(https_urls[0]));
-        winusb_setup(usbd_dev);
+    usbd_device* usbd_dev = usb_setup();
+    dfu_setup(usbd_dev, &target_manifest_app, state_change, NULL);
+    webusb_setup(usbd_dev,
+                 https_urls, sizeof(https_urls)/sizeof(https_urls[0]));
+    winusb_setup(usbd_dev);
         
+    if (target_get_force_bootloader() || !validate_application()) {
         while (1) {
             usbd_poll(usbd_dev);
         }
     } else {
+#if !HAVE_BUTTON
+        for (int dfu_wait = 2000000; dfu_wait > 0; dfu_wait--) {
+            usbd_poll(usbd_dev);
+	    if (current_dfu_state != STATE_DFU_IDLE)
+                dfu_wait = 2000000;
+        }
+#endif
+	target_usb_init();
         jump_to_application();
     }
     
