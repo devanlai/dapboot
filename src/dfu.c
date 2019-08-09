@@ -231,6 +231,7 @@ static int dfu_control_class_request(usbd_device *usbd_dev,
                 case STATE_DFU_IDLE: {
                     current_dfu_offset = 0;
                     /* Fall through */
+                    __attribute__ ((fallthrough));
                 }
                 case STATE_DFU_UPLOAD_IDLE: {
                     *buf = (uint8_t*)(APP_BASE_ADDRESS + current_dfu_offset);
