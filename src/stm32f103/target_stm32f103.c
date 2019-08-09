@@ -162,7 +162,7 @@ bool target_get_force_bootloader(void) {
 
 #if HAVE_BUTTON
     /* Wait sometime in case the button has some debounce capacitor */
-    for (int i = 0; i < 1440000; i++) {
+    for (int i = 0; i < BUTTON_SAMPLE_DELAY_CYCLES; i++) {
         __asm__("nop");
     }
     /* Check if the user button is held down */
