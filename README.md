@@ -33,6 +33,14 @@ Here is an example `local.mk` that changes the default target to the STLink/v2 a
     TARGET ?= STLINK
     OOCD_INTERFACE ?= interface/stlink-v2.cfg
 
+You can also use the env variable `DEFS` to override default configuration for a target, like:
+
+    # Disable LED on BluePill
+    DEFS="-DHAVE_LED=0" make TARGET=BLUEPILL
+
+    # Allow access to all Flash on MapleMini and change the app base address
+    DEFS="-DFLASH_SIZE_OVERRIDE=0x20000 -DAPP_BASE_ADDRESS=0x08004000" make TARGET=MAPLEMINI LDSCRIPT="/some/folder/stm32f103x8-16kb-boot.ld"
+
 ## Using the bootloader
 ### Building for the bootloader
 The bootloader occupies the lower 8KiB of flash, so your application must offset its flash contents by 8KiB. This can be done by modifying your linker script or flags as appropriate.

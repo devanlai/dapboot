@@ -19,31 +19,65 @@
 #ifndef CONFIG_H_INCLUDED
 #define CONFIG_H_INCLUDED
 
+#ifndef APP_BASE_ADDRESS
 #define APP_BASE_ADDRESS 0x08002000
+#endif
+#ifndef FLASH_PAGE_SIZE
 #define FLASH_PAGE_SIZE  1024
+#endif
+#ifndef DFU_UPLOAD_AVAILABLE
 #define DFU_UPLOAD_AVAILABLE 1
+#endif
+#ifndef DFU_DOWNLOAD_AVAILABLE
 #define DFU_DOWNLOAD_AVAILABLE 1
+#endif
 
+#ifndef HAVE_LED
 #define HAVE_LED 1
+#endif
+#ifndef LED_GPIO_PORT
 #define LED_GPIO_PORT GPIOB
+#endif
+#ifndef LED_GPIO_PIN
 #define LED_GPIO_PIN  GPIO1
+#endif
+#ifndef LED_OPEN_DRAIN
 #define LED_OPEN_DRAIN 0
+#endif
 
 /* Technically, there is a button on PB8, but the button is
    also shorted to BOOT0, so it's not very useful for us to
    sample PB8 on boot, since pulling it high will already
    trigger the ROM serial bootloader and prevent us from
    running anyways. */
+#ifndef HAVE_BUTTON
 #define HAVE_BUTTON 0
+#endif
 
+#ifndef HAVE_USB_PULLUP_CONTROL
 #define HAVE_USB_PULLUP_CONTROL 1
+#endif
+#ifndef USB_PULLUP_GPIO_PORT
 #define USB_PULLUP_GPIO_PORT GPIOB
+#endif
+#ifndef USB_PULLUP_GPIO_PIN
 #define USB_PULLUP_GPIO_PIN  GPIO9
+#endif
+#ifndef USB_PULLUP_ACTIVE_HIGH
 #define USB_PULLUP_ACTIVE_HIGH 0
+#endif
+#ifndef USB_PULLUP_OPEN_DRAIN
 #define USB_PULLUP_OPEN_DRAIN 1
+#endif
 
+#ifndef USES_GPIOA
 #define USES_GPIOA 0
+#endif
+#ifndef USES_GPIOB
 #define USES_GPIOB 1
+#endif
+#ifndef USES_GPIOC
 #define USES_GPIOC 0
+#endif
 
 #endif
