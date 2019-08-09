@@ -44,6 +44,8 @@ The bootloader can be built to look for arbitrary patterns, but the default for 
 
 The bootloader currently looks for `0x544F` in RTC backup register 1 and `0x4F42` in RTC backup register 0 (together they spell "BOOT" in ASCII).
 
+You can also use a button to stay in bootloader while booting. It's configured using `HAVE_BUTTON` define. If your button has a debounce capacitor, you can use `BUTTON_SAMPLE_DELAY_CYCLES` define to specify how many cycles to wait before sampling the I/O pin, by default it is approximately 20ms in a 72Mhz MCU.
+
 ### WebUSB
 This bootloader implements the draft [WebUSB](https://wicg.github.io/webusb/) specification, which allows web pages to access the bootloader (after presenting the user with a device picker dialog).
 
