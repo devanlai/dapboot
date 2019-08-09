@@ -161,6 +161,10 @@ bool target_get_force_bootloader(void) {
     backup_write(BKP0, 0);
 
 #if HAVE_BUTTON
+    /* Wait sometime in case the button has some debounce capacitor */
+    for (int i = 0; i < 1440000; i++) {
+        __asm__("nop");
+    }
     /* Check if the user button is held down */
     if (BUTTON_ACTIVE_HIGH) {
         if (gpio_get(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN)) {
