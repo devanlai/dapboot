@@ -161,7 +161,7 @@ bool target_get_force_bootloader(void) {
     backup_write(BKP0, 0);
 
 #if HAVE_BUTTON
-    /* Wait sometime in case the button has some debounce capacitor */
+    /* Wait some time in case the button has some debounce capacitor */
     int i;
     for (i = 0; i < BUTTON_SAMPLE_DELAY_CYCLES; i++) {
         __asm__("nop");
