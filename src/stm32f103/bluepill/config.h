@@ -49,7 +49,20 @@
 #endif
 
 #ifndef HAVE_BUTTON
-#define HAVE_BUTTON 0
+#define HAVE_BUTTON 1
+#endif
+#ifndef BUTTON_ACTIVE_HIGH
+#define BUTTON_ACTIVE_HIGH 1
+#endif
+#ifndef BUTTON_GPIO_PORT
+#define BUTTON_GPIO_PORT GPIOB
+#endif
+#ifndef BUTTON_GPIO_PIN
+#define BUTTON_GPIO_PIN GPIO2
+#endif
+// Blue-Pull has 100k resistors on PB2, so we can't use weak pulls to read it.
+#ifndef BUTTON_USES_PULL
+#define BUTTON_USES_PULL 0
 #endif
 
 #ifndef BUTTON_SAMPLE_DELAY_CYCLES
@@ -58,6 +71,10 @@
 
 #ifndef HAVE_USB_PULLUP_CONTROL
 #define HAVE_USB_PULLUP_CONTROL 0
+#endif
+
+#ifndef USES_GPIOB
+#define USES_GPIOB 1
 #endif
 
 #ifndef USES_GPIOC
