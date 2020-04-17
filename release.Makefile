@@ -31,7 +31,10 @@ BUILD_DIR      ?= ./build
 
 all: dapboot-bluepill.bin \
      dapboot-maplemini.bin \
-     dapboot-stlink.bin
+     dapboot-stlink.bin \
+     dapboot-bluepill-128.bin \
+     dapboot-maplemini-128.bin \
+     dapboot-stlink-128.bin
 
 clean:
 	$(Q)$(RM) $(BUILD_DIR)/*.bin
@@ -58,4 +61,22 @@ dapboot-maplemini.bin: | $(BUILD_DIR)
 	@printf "  BUILD $(@)\n"
 	$(Q)$(MAKE) TARGET=MAPLEMINI -C src/ clean
 	$(Q)$(MAKE) TARGET=MAPLEMINI -C src/
+	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+
+dapboot-bluepill-128.bin: | $(BUILD_DIR)
+	@printf "  BUILD $(@)\n"
+	$(Q)$(MAKE) TARGET=BLUEPILL_128 -C src/ clean
+	$(Q)$(MAKE) TARGET=BLUEPILL_128 -C src/
+	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+
+dapboot-stlink-128.bin: | $(BUILD_DIR)
+	@printf "  BUILD $(@)\n"
+	$(Q)$(MAKE) TARGET=STLINK_128 -C src/ clean
+	$(Q)$(MAKE) TARGET=STLINK_128 -C src/
+	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+
+dapboot-maplemini-128.bin: | $(BUILD_DIR)
+	@printf "  BUILD $(@)\n"
+	$(Q)$(MAKE) TARGET=MAPLEMINI_128 -C src/ clean
+	$(Q)$(MAKE) TARGET=MAPLEMINI_128 -C src/
 	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)

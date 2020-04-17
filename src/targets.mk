@@ -26,16 +26,34 @@ ifeq ($(TARGET),BLUEPILL)
 	LDSCRIPT			:= ./stm32f103/stm32f103x8.ld
 	ARCH				= STM32F1
 endif
+ifeq ($(TARGET),BLUEPILL_128)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/bluepill
+	LDSCRIPT			:= ./stm32f103/stm32f103xB.ld
+	ARCH				= STM32F1
+endif
 ifeq ($(TARGET),MAPLEMINI)
 	TARGET_COMMON_DIR	:= ./stm32f103
 	TARGET_SPEC_DIR		:= ./stm32f103/maplemini
 	LDSCRIPT			:= ./stm32f103/stm32f103x8.ld
 	ARCH				= STM32F1
 endif
+ifeq ($(TARGET),MAPLEMINI_128)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/maplemini
+	LDSCRIPT			:= ./stm32f103/stm32f103xB.ld
+	ARCH				= STM32F1
+endif
 ifeq ($(TARGET),STLINK)
 	TARGET_COMMON_DIR	:= ./stm32f103
 	TARGET_SPEC_DIR		:= ./stm32f103/stlink
 	LDSCRIPT			:= ./stm32f103/stm32f103x8.ld
+	ARCH				= STM32F1
+endif
+ifeq ($(TARGET),STLINK_128)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/stlink
+	LDSCRIPT			:= ./stm32f103/stm32f103xB.ld
 	ARCH				= STM32F1
 endif
 
