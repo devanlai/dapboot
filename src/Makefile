@@ -25,6 +25,7 @@ include targets.mk
 SRCS := $(wildcard *.c)
 SRCS += $(wildcard $(TARGET_COMMON_DIR)/*.c)
 SRCS += $(wildcard $(TARGET_SPEC_DIR)/*.c)
+SRCS += $(wildcard ./libc/*.c)
 
 OBJS += $(SRCS:.c=.o)
 DEPS  = $(SRCS:.c=.d)

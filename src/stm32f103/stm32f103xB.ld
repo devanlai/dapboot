@@ -22,13 +22,13 @@
 /* Linker script for STM32F103xB, 128k flash, 20k RAM. */
 
 /* Define memory regions. */
-/* 6.75k for the bootloader at the end, with a copy of the vector table at
+/* 6.5k for the bootloader at the end, with a copy of the vector table at
  * the beginning to bootstrap the bootloader
  */
 MEMORY
 {
 	bootstrap (rx) : ORIGIN = 0x08000000, LENGTH = 1K
-	rom (rx) : ORIGIN = 0x0801e400, LENGTH = 0x1C00
+	rom (rx) : ORIGIN = 0x0801e600, LENGTH = 0x1A00
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 20K
 }
 
