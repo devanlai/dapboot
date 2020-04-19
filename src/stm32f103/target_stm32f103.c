@@ -45,6 +45,10 @@
 #define USES_GPIOC 0
 #endif
 
+#ifndef BUTTON_USES_PULL
+#define BUTTON_USES_PULL 1
+#endif
+
 #ifdef FLASH_SIZE_OVERRIDE
 _Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
                "Incompatible flash size");
@@ -95,12 +99,15 @@ void target_gpio_setup(void) {
 #if HAVE_BUTTON
     {
         const uint8_t mode = GPIO_MODE_INPUT;
-        const uint8_t conf = GPIO_CNF_INPUT_PULL_UPDOWN;
+        const uint8_t conf = (BUTTON_USES_PULL ? GPIO_CNF_INPUT_PULL_UPDOWN
+                                               : GPIO_CNF_INPUT_FLOAT);
         gpio_set_mode(BUTTON_GPIO_PORT, mode, conf, BUTTON_GPIO_PIN);
-        if (BUTTON_ACTIVE_HIGH) {
-            gpio_clear(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
-        } else {
-            gpio_set(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
+        if (BUTTON_USES_PULL) {
+            if (BUTTON_ACTIVE_HIGH) {
+                gpio_clear(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
+            } else {
+                gpio_set(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
+            }
         }
     }
 #endif
