@@ -78,7 +78,7 @@ PREFIX         ?= arm-none-eabi
 CC             := $(PREFIX)-gcc
 CXX            := $(PREFIX)-g++
 LD             := $(PREFIX)-gcc
-AR             := $(PREFIX)-ar
+AR             := $(PREFIX)-gcc-ar
 AS             := $(PREFIX)-as
 OBJCOPY        := $(PREFIX)-objcopy
 OBJDUMP        := $(PREFIX)-objdump
@@ -94,7 +94,7 @@ LIB_DIR     = $(OPENCM3_DIR)/lib
 ####################################################################
 # C flags
 
-CFLAGS      += -Os -g -std=gnu11
+CFLAGS      += -Os -flto -g -std=gnu11
 CFLAGS      += -Wextra -Wshadow -Wimplicit-function-declaration
 CFLAGS      += -Wredundant-decls -Wmissing-prototypes -Wstrict-prototypes
 CFLAGS      += -fno-common -ffunction-sections -fdata-sections
@@ -102,7 +102,7 @@ CFLAGS      += -fno-common -ffunction-sections -fdata-sections
 ####################################################################
 # C++ flags
 
-CXXFLAGS    += -Os -g
+CXXFLAGS    += -Os -flto -g
 CXXFLAGS    += -Wextra -Wshadow -Wredundant-decls  -Weffc++
 CXXFLAGS    += -fno-common -ffunction-sections -fdata-sections
 
@@ -116,7 +116,7 @@ CPPFLAGS    += -I$(INCLUDE_DIR) $(DEFS)
 ####################################################################
 # Linker flags
 
-LDFLAGS    += --static -nostartfiles
+LDFLAGS    += -flto -Os -g --static -nostartfiles
 LDFLAGS    += -L$(LIB_DIR)
 LDFLAGS    += -T$(LDSCRIPT)
 LDFLAGS    += -Wl,-Map=$(*).map
@@ -159,7 +159,7 @@ $(OPENCM3_DIR)/Makefile:
 	$(Q)git submodule update --init $(OPENCM3_DIR)
 
 $(LIB_DIR)/lib$(LIBNAME).a: $(OPENCM3_DIR)/Makefile
-	$(Q)$(MAKE) -C $(OPENCM3_DIR) TARGETS=$(OPENCM3_TARGET)
+	$(Q)$(MAKE) -C $(OPENCM3_DIR) AR=$(AR) CFLAGS="-flto -g" TARGETS=$(OPENCM3_TARGET)
 
 locm3: $(LIB_DIR)/lib$(LIBNAME).a
 
