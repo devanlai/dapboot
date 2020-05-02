@@ -117,6 +117,7 @@ CPPFLAGS    += -I$(INCLUDE_DIR) $(DEFS)
 # Linker flags
 
 LDFLAGS    += -flto -Os -g --static -nostartfiles
+LDFLAGS    += -specs=nano.specs
 LDFLAGS    += -L$(LIB_DIR)
 LDFLAGS    += -T$(LDSCRIPT)
 LDFLAGS    += -Wl,-Map=$(*).map
