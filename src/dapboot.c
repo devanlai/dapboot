@@ -27,12 +27,15 @@
 #include "winusb.h"
 #include "config.h"
 
+/* Used only in the high memory bootloader */
+extern volatile const vector_table_t vector_table;
+
 static inline void __set_MSP(uint32_t topOfMainStack) {
     asm("msr msp, %0" : : "r" (topOfMainStack));
 }
 
 bool validate_application(void) {
-    if ((*(volatile uint32_t *)APP_BASE_ADDRESS & 0x2FFE0000) == 0x20000000) {
+    if (((uint32_t)(APP_INITIAL_STACK) & 0x2FFE0000) == 0x20000000) {
         return true;
     }
     return false;
@@ -41,19 +44,19 @@ bool validate_application(void) {
 static void jump_to_application(void) __attribute__ ((noreturn));
 
 static void jump_to_application(void) {
-    vector_table_t* app_vector_table = (vector_table_t*)APP_BASE_ADDRESS;
-    
+
     /* Use the application's vector table */
-    target_relocate_vector_table();
+    if (APP_RELOCATE_VECTORS)
+        target_relocate_vector_table();
 
     /* Do any necessary early setup for the application */
     target_pre_main();
 
     /* Initialize the application's stack pointer */
-    __set_MSP((uint32_t)(app_vector_table->initial_sp_value));
+    __set_MSP((uint32_t)(APP_INITIAL_STACK));
 
     /* Jump to the application entry point */
-    app_vector_table->reset();
+    APP_ENTRY_POINT();
     
     while (1);
 }
