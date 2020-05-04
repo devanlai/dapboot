@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
-URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/6-2017q2/gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2
-TOOLCHAIN=gcc-arm-none-eabi-6-2017-q2-update
+URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2
+TOOLCHAIN=gcc-arm-none-eabi-9-2019-q4-major
 TOOLCHAINS=$HOME/toolchains
 TOOLCHAIN_MISSING=0
 GCC=${TOOLCHAINS}/gcc-arm-embedded/bin/arm-none-eabi-gcc
