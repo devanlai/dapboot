@@ -159,6 +159,9 @@ $(LDSCRIPT):
 $(OPENCM3_DIR)/Makefile:
 	$(Q)git submodule update --init $(OPENCM3_DIR)
 
+# If overriding the toolchain, use it when building LOCM3
+export PREFIX
+
 $(LIB_DIR)/lib$(LIBNAME).a: $(OPENCM3_DIR)/Makefile
 	$(Q)$(MAKE) -C $(OPENCM3_DIR) AR=$(AR) CFLAGS="-flto -g" TARGETS=$(OPENCM3_TARGET)
 
