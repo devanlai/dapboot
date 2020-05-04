@@ -98,7 +98,11 @@ static char serial_number[USB_SERIAL_NUM_LENGTH+1];
 
 static const char *usb_strings[] = {
     "Devanarchy",
+#ifdef BOOTLOADER_HIGH
+    "DAPBoot High-Memory DFU Bootloader",
+#else
     "DAPBoot DFU Bootloader",
+#endif
     serial_number,
     "DAPBoot DFU"
 };
