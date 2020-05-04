@@ -26,17 +26,59 @@ ifeq ($(TARGET),BLUEPILL)
 	LDSCRIPT			:= ./stm32f103/stm32f103x8.ld
 	ARCH				= STM32F1
 endif
+ifeq ($(TARGET),BLUEPILL_HIGH)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/bluepill
+	LDSCRIPT		:= ./stm32f103/stm32f103x8_high.ld
+	ARCH			= STM32F1
+	DEFS			+= -DBOOTLOADER_HIGH
+endif
+ifeq ($(TARGET),BLUEPILL_HIGH_128)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/bluepill
+	LDSCRIPT		:= ./stm32f103/stm32f103xb_high.ld
+	ARCH			= STM32F1
+	DEFS			+= -DBOOTLOADER_HIGH
+endif
 ifeq ($(TARGET),MAPLEMINI)
 	TARGET_COMMON_DIR	:= ./stm32f103
 	TARGET_SPEC_DIR		:= ./stm32f103/maplemini
 	LDSCRIPT			:= ./stm32f103/stm32f103x8.ld
 	ARCH				= STM32F1
 endif
+ifeq ($(TARGET),MAPLEMINI_HIGH)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/maplemini
+	LDSCRIPT		:= ./stm32f103/stm32f103x8_high.ld
+	ARCH			= STM32F1
+	DEFS			+= -DBOOTLOADER_HIGH
+endif
+ifeq ($(TARGET),MAPLEMINI_HIGH_128)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/maplemini
+	LDSCRIPT		:= ./stm32f103/stm32f103xb_high.ld
+	ARCH			= STM32F1
+	DEFS			+= -DBOOTLOADER_HIGH
+endif
 ifeq ($(TARGET),STLINK)
 	TARGET_COMMON_DIR	:= ./stm32f103
 	TARGET_SPEC_DIR		:= ./stm32f103/stlink
 	LDSCRIPT			:= ./stm32f103/stm32f103x8.ld
 	ARCH				= STM32F1
+endif
+ifeq ($(TARGET),STLINK_HIGH)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/stlink
+	LDSCRIPT		:= ./stm32f103/stm32f103x8_high.ld
+	ARCH			= STM32F1
+	DEFS			+= -DBOOTLOADER_HIGH
+endif
+ifeq ($(TARGET),STLINK_HIGH_128)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/stlink
+	LDSCRIPT		:= ./stm32f103/stm32f103xb_high.ld
+	ARCH			= STM32F1
+	DEFS			+= -DBOOTLOADER_HIGH
 endif
 
 ifndef ARCH

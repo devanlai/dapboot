@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libopencm3/cm3/vector.h>
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/dfu.h>
 
@@ -93,6 +94,24 @@ extern unsigned _stack;
 static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
+
+
+    if (DFU_PATCH_VECTORS && current_dfu_offset == 0) {
+        if (dfu_download_size < offsetof(vector_table_t, reserved_x001c[1])) {
+            /* Can't handle splitting the vector table right now */
+            dfu_set_status(DFU_STATUS_ERR_VENDOR);
+        } else {
+            vector_table_t* app_vector_table = (vector_table_t*)dfu_download_buffer;
+            /* Stash the application's initial stack value and reset
+               pointer in unused vector table entries */
+            app_vector_table->reserved_x001c[0] = (vector_table_entry_t)(app_vector_table->initial_sp_value);
+            app_vector_table->reserved_x001c[1] = app_vector_table->reset;
+            /* Overwrite the stack and reset pointer to run the
+               bootloader instead */
+            app_vector_table->initial_sp_value = &_stack;
+            app_vector_table->reset = reset_handler;
+        }
+    }
 
     const uint16_t* data = (uint16_t*)dfu_download_buffer;
     uint16_t* dest = (uint16_t*)(APP_BASE_ADDRESS + current_dfu_offset);
@@ -234,7 +253,6 @@ static int dfu_control_class_request(usbd_device *usbd_dev,
                     __attribute__ ((fallthrough));
                 }
                 case STATE_DFU_UPLOAD_IDLE: {
-                    *buf = (uint8_t*)(APP_BASE_ADDRESS + current_dfu_offset);
                     uint16_t len_to_copy = req->wLength;
                     size_t max_firmware_size = target_get_max_firmware_size();
                     if (current_dfu_offset + req->wLength > max_firmware_size) {
@@ -244,6 +262,23 @@ static int dfu_control_class_request(usbd_device *usbd_dev,
                         dfu_set_state(STATE_DFU_UPLOAD_IDLE);
                     }
                     *len = len_to_copy;
+                    if (DFU_PATCH_VECTORS && current_dfu_offset < sizeof(vector_table_t)) {
+                        /* Copy the flash memory to the download buffer, to
+                           undo the vector modifications. */
+                        memcpy(dfu_download_buffer, (const void*)(APP_BASE_ADDRESS),
+                               sizeof(dfu_download_buffer));
+                        vector_table_t* app_vector_table = (vector_table_t*)dfu_download_buffer;
+                        /* Put the original stack pointer and reset vectors
+                           back */
+                        app_vector_table->initial_sp_value = (unsigned int*)(app_vector_table->reserved_x001c[0]);
+                        app_vector_table->reset = app_vector_table->reserved_x001c[1];
+                        app_vector_table->reserved_x001c[0] = 0;
+                        app_vector_table->reserved_x001c[1] = 0;
+                        /* Return the correct pointer */
+                        *buf = dfu_download_buffer + current_dfu_offset;
+                    } else {
+                        *buf = (uint8_t*)(APP_BASE_ADDRESS + current_dfu_offset);
+                    }
                     current_dfu_offset += len_to_copy;
                     break;
                 }

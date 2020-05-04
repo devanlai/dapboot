@@ -20,6 +20,20 @@ To build other targets, you can override the
 |`MAPLEMINI`  | LeafLabs Maple Mini board and clone derivatives | http://wiki.stm32duino.com/index.php?title=Maple_Mini |
 |`STLINK`     | STLink/v2 hardware clones | https://wiki.paparazziuav.org/wiki/STLink#Clones |
 
+For each of the above targets, there are three variants that can be added to the target name:
+
+| Target Variant | Description                                           |
+| -------------- | ----------------------------------------------------- |
+|` `             | Standard bootloader, using first 8kB of flash         |
+|`_HIGH`         | High memory bootloader for 64kB chips  (experimental) |
+|`_HIGH_128`     | High memory bootloader for 128kB chips (experimental) |
+
+The high memory bootloader is a variation that doesn't require the application to be at an offset, the bootloader resides in the top 6.5kB of ROM and hides its reset and stack vectors inside unused entries of the application vector table. As an example, to compile for a Bluepill board with 128kB flash, use:
+
+    make clean
+    make TARGET=BLUEPILL_HIGH_128
+
+
 ## Flash instructions
 The `make flash` target will use openocd to upload the bootloader to an attached board. By default, the Makefile assumes you're using a [CMSIS-DAP](http://www.arm.com/products/processors/cortex-m/cortex-microcontroller-software-interface-standard.php) based probe, but you can override this by overriding `OOCD_INTERFACE` variable. For example:
 
@@ -43,9 +57,10 @@ You can also use the env variable `DEFS` to override default configuration for a
 
 ## Using the bootloader
 ### Building for the bootloader
-The bootloader occupies the lower 8KiB of flash, so your application must offset its flash contents by 8KiB. This can be done by modifying your linker script or flags as appropriate.
+The standard bootloader occupies the lower 8KiB of flash, so your application must offset its flash contents by 8KiB. This can be done by modifying your linker script or flags as appropriate.
 
-See the [highboot branch](https://github.com/devanlai/dapboot/tree/highboot) for an experimental variation that doesn't require the application to be offset.
+The high memory bootloaders do not use the lower part of the flash, so you only need to make sure your application leaves 6.5kB of flash free.
+
 
 ### Switching to the bootloader
 The bootloader can be built to look for arbitrary patterns, but the default for the STM32F103 target looks for a magic value stored in the RTC backup registers. Writing the magic value and then resetting will run the bootloader instead of the main application.
@@ -53,6 +68,8 @@ The bootloader can be built to look for arbitrary patterns, but the default for 
 The bootloader currently looks for `0x544F` in RTC backup register 1 and `0x4F42` in RTC backup register 0 (together they spell "BOOT" in ASCII).
 
 You can also use a button to stay in bootloader while booting. It's configured using `HAVE_BUTTON` define. If your button has a debounce capacitor, you can use `BUTTON_SAMPLE_DELAY_CYCLES` define to specify how many cycles to wait before sampling the I/O pin, by default it is approximately 20ms in a 72Mhz MCU.
+
+On the bluepill boards, the default is using the BOOT1 input (available on jumper in the board) to enter the bootloader.
 
 ### WebUSB
 This bootloader implements the draft [WebUSB](https://wicg.github.io/webusb/) specification, which allows web pages to access the bootloader (after presenting the user with a device picker dialog).

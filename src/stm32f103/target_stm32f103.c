@@ -25,6 +25,7 @@
 #include <libopencm3/stm32/desig.h>
 #include <libopencm3/cm3/scb.h>
 
+#include "dapboot.h"
 #include "target.h"
 #include "config.h"
 #include "backup.h"
