@@ -172,7 +172,7 @@ locm3: $(LIB_DIR)/lib$(LIBNAME).a
 
 %.bin: %.elf
 	@#printf "  OBJCOPY $(*).bin\n"
-	$(Q)$(OBJCOPY) -Obinary $(*).elf $(*).bin
+	$(Q)$(OBJCOPY) -Obinary --gap-fill=0xff $(*).elf $(*).bin
 
 %.hex: %.elf
 	@#printf "  OBJCOPY $(*).hex\n"
