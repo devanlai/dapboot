@@ -16,8 +16,8 @@ To build other targets, you can override the
 
 | Target Name | Description | Link |
 | ----------- | ----------- |----- |
-|`BLUEPILL`   | Cheap dev board | http://wiki.stm32duino.com/index.php?title=Blue_Pill |
-|`MAPLEMINI`  | LeafLabs Maple Mini board and clone derivatives | http://wiki.stm32duino.com/index.php?title=Maple_Mini |
+|`BLUEPILL`   | Cheap dev board | https://stm32duinoforum.com/forum/wiki_subdomain/index_title_Blue_Pill.html |
+|`MAPLEMINI`  | LeafLabs Maple Mini board and clone derivatives | https://stm32duinoforum.com/forum/wiki_subdomain/index_title_Maple_Mini.html |
 |`STLINK`     | STLink/v2 hardware clones | https://wiki.paparazziuav.org/wiki/STLink#Clones |
 
 For each of the above targets, there are three variants that can be added to the target name:
