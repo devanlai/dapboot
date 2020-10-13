@@ -16,39 +16,18 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* Default dummy implementations for optional target functions */
+#ifndef BACKUP_H_INCLUDED
+#define BACKUP_H_INCLUDED
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <libopencm3/cm3/scb.h>
+enum BackupRegister {
+    BKP0 = 0,
+    BKP1,
+    BKP2,
+    BKP3,
+    BKP4,
+};
 
-void target_get_serial_number(char* dest, size_t max_chars) __attribute__((weak));
-void target_log(const char* str) __attribute__((weak));
-void target_manifest_app(void) __attribute__((weak));
-void target_pre_main(void) __attribute__((weak));
-size_t target_get_timeout(void) __attribute__((weak));
+extern void backup_write(enum BackupRegister reg, uint32_t value);
+extern uint32_t backup_read(enum BackupRegister reg);
 
-void target_get_serial_number(char* dest, size_t max_chars) {
-    (void)max_chars;
-    if (dest) {
-        dest[0] = '\0';
-    }
-}
-
-void target_log(const char* str) {
-    (void)str;
-}
-
-void target_manifest_app(void) {
-    scb_reset_system();
-}
-
-void target_pre_main(void)
-{
-
-}
-
-size_t target_get_timeout(void)
-{
-	return 100;
-}
+#endif

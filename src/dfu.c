@@ -30,6 +30,10 @@
 #include "dapboot.h"
 #include "config.h"
 
+#ifndef TARGET_DFU_WTRANSFERSIZE
+#define TARGET_DFU_WTRANSFERSIZE USB_CONTROL_BUF_SIZE
+#endif
+
 const struct usb_dfu_descriptor dfu_function = {
     .bLength = sizeof(struct usb_dfu_descriptor),
     .bDescriptorType = DFU_FUNCTIONAL,
@@ -37,7 +41,7 @@ const struct usb_dfu_descriptor dfu_function = {
                      (DFU_UPLOAD_AVAILABLE ? USB_DFU_CAN_UPLOAD : 0) |
                      USB_DFU_WILL_DETACH ),
     .wDetachTimeout = 255,
-    .wTransferSize = USB_CONTROL_BUF_SIZE,
+    .wTransferSize = TARGET_DFU_WTRANSFERSIZE,
     .bcdDFUVersion = 0x0110,
 };
 
@@ -165,7 +169,7 @@ static int dfu_control_class_request(usbd_device *usbd_dev,
 #if DFU_DOWNLOAD_AVAILABLE
                 case STATE_DFU_DNLOAD_SYNC: {
                     dfu_set_state(STATE_DFU_DNBUSY);
-                    bwPollTimeout = 100;
+                    bwPollTimeout = target_get_timeout();
                     *complete = &dfu_on_download_request;
                     break;
                 }

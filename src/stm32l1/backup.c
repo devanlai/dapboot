@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, Devan Lai
+ * 2020, Karl Palsson, ported to L1
  *
  * Permission to use, copy, modify, and/or distribute this software
  * for any purpose with or without fee is hereby granted, provided
@@ -16,39 +17,21 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* Default dummy implementations for optional target functions */
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/rtc.h>
+#include <libopencm3/stm32/pwr.h>
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <libopencm3/cm3/scb.h>
+#include "backup.h"
 
-void target_get_serial_number(char* dest, size_t max_chars) __attribute__((weak));
-void target_log(const char* str) __attribute__((weak));
-void target_manifest_app(void) __attribute__((weak));
-void target_pre_main(void) __attribute__((weak));
-size_t target_get_timeout(void) __attribute__((weak));
-
-void target_get_serial_number(char* dest, size_t max_chars) {
-    (void)max_chars;
-    if (dest) {
-        dest[0] = '\0';
-    }
-}
-
-void target_log(const char* str) {
-    (void)str;
-}
-
-void target_manifest_app(void) {
-    scb_reset_system();
-}
-
-void target_pre_main(void)
+void backup_write(enum BackupRegister reg, uint32_t value)
 {
-
+	rcc_periph_clock_enable(RCC_PWR);
+	pwr_disable_backup_domain_write_protect();
+	RTC_BKPXR(reg) = value;
+	pwr_enable_backup_domain_write_protect();
 }
 
-size_t target_get_timeout(void)
+uint32_t backup_read(enum BackupRegister reg)
 {
-	return 100;
+	return RTC_BKPXR(reg);
 }
