@@ -26,6 +26,7 @@ void target_get_serial_number(char* dest, size_t max_chars) __attribute__((weak)
 void target_log(const char* str) __attribute__((weak));
 void target_manifest_app(void) __attribute__((weak));
 void target_pre_main(void) __attribute__((weak));
+size_t target_get_timeout(void) __attribute__((weak));
 
 void target_get_serial_number(char* dest, size_t max_chars) {
     (void)max_chars;
@@ -45,4 +46,9 @@ void target_manifest_app(void) {
 void target_pre_main(void)
 {
 
+}
+
+size_t target_get_timeout(void)
+{
+	return 100;
 }

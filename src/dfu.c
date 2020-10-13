@@ -169,7 +169,7 @@ static int dfu_control_class_request(usbd_device *usbd_dev,
 #if DFU_DOWNLOAD_AVAILABLE
                 case STATE_DFU_DNLOAD_SYNC: {
                     dfu_set_state(STATE_DFU_DNBUSY);
-                    bwPollTimeout = 100;
+                    bwPollTimeout = target_get_timeout();
                     *complete = &dfu_on_download_request;
                     break;
                 }
