@@ -83,6 +83,7 @@ SECTIONS
 	.data : {
 		_data = .;
 		*(.data*)	/* Read-write initialized data */
+		*(.ramtext*)	/* code, that needs to be in ram */
 		. = ALIGN(4);
 		_edata = .;
 	} >ram AT >rom

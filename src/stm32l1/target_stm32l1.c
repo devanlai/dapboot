@@ -148,7 +148,7 @@ static void flash_erase_page(uint32_t page_address)
  * than 64MB away from flash address space, must be a long_call.
  * (see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78903 for noinline) */
 void flash_program_half_page(uint32_t *dst, const uint32_t *buf);
-__attribute__ ((noinline, long_call, section (".data.ramfunctions")))
+__attribute__ ((noinline, long_call, section (".ramtext")))
 void flash_program_half_page(uint32_t *dst, const uint32_t *buf)
 {
         const uint32_t *src = buf;
