@@ -80,6 +80,13 @@ ifeq ($(TARGET),STLINK_HIGH_128)
 	ARCH			= STM32F1
 	DEFS			+= -DBOOTLOADER_HIGH
 endif
+ifeq ($(TARGET),STM32L1_GENERIC)
+	TARGET_COMMON_DIR	:= ./stm32l1
+	TARGET_SPEC_DIR		:= ./stm32l1/generic
+	LDSCRIPT		:= ./stm32l1/stm32l1-standard.ld
+	ARCH			= STM32L1
+	DEFS			+= -DNDEBUG
+endif
 
 ifndef ARCH
 $(error Unknown target $(TARGET))
