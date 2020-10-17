@@ -20,6 +20,6 @@ jobs:
           name: Compile firmware
           command: make -f release.Makefile -k all
           environment:
-            PREFIX: "~/toolchains/gcc-arm-embedded/bin/arm-none-eabi"
+            PREFIX: "~/toolchains/gcc-arm-embedded/bin/arm-none-eabi-"
       - store_artifacts:
           path: build/

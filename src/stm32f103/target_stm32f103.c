@@ -199,7 +199,7 @@ static uint16_t* get_flash_end(void) {
     return (uint16_t*)(FLASH_BASE + FLASH_SIZE_OVERRIDE);
 #else
     /* Only allow access to the chip's self-reported flash size */
-    return (uint16_t*)(FLASH_BASE + (size_t)DESIG_FLASH_SIZE*FLASH_PAGE_SIZE);
+    return (uint16_t*)(FLASH_BASE + ((size_t)desig_get_flash_size())*1024);
 #endif
 }
 

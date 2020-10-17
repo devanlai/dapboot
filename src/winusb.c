@@ -39,10 +39,11 @@ static const struct winusb_compatible_id_descriptor winusb_wcid = {
     }
 };
 
-static int winusb_control_vendor_request(usbd_device *usbd_dev,
-                                         struct usb_setup_data *req,
-                                         uint8_t **buf, uint16_t *len,
-                                         usbd_control_complete_callback* complete) {
+static enum usbd_request_return_codes
+winusb_control_vendor_request(usbd_device *usbd_dev,
+                              struct usb_setup_data *req,
+                              uint8_t **buf, uint16_t *len,
+                              usbd_control_complete_callback* complete) {
     (void)complete;
     (void)usbd_dev;
 
@@ -50,7 +51,7 @@ static int winusb_control_vendor_request(usbd_device *usbd_dev,
         return USBD_REQ_NEXT_CALLBACK;
     }
 
-    int status = USBD_REQ_NOTSUPP;
+    enum usbd_request_return_codes status = USBD_REQ_NOTSUPP;
     if (((req->bmRequestType & USB_REQ_TYPE_RECIPIENT) == USB_REQ_TYPE_DEVICE) &&
         (req->wIndex == WINUSB_REQ_GET_COMPATIBLE_ID_FEATURE_DESCRIPTOR)) {
         *buf = (uint8_t*)(&winusb_wcid);

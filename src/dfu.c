@@ -93,8 +93,6 @@ static void dfu_on_download_complete(usbd_device* usbd_dev, struct usb_setup_dat
     dfu_set_state(STATE_DFU_MANIFEST_SYNC);
 }
 
-extern unsigned _stack;
-
 static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
@@ -144,15 +142,16 @@ static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data
     }
 }
 
-static int dfu_control_class_request(usbd_device *usbd_dev,
-                                     struct usb_setup_data *req,
-                                     uint8_t **buf, uint16_t *len,
-                                     usbd_control_complete_callback* complete) {
+static enum usbd_request_return_codes
+dfu_control_class_request(usbd_device *usbd_dev,
+                          struct usb_setup_data *req,
+                          uint8_t **buf, uint16_t *len,
+                          usbd_control_complete_callback* complete) {
     if (req->wIndex != INTF_DFU) {
         return USBD_REQ_NEXT_CALLBACK;
     }
 
-    int status = USBD_REQ_HANDLED;
+    enum usbd_request_return_codes status = USBD_REQ_HANDLED;
     switch (req->bRequest) {
         case DFU_GETSTATE: {
             struct dfu_getstate_response* resp;

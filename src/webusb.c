@@ -50,10 +50,11 @@ static const struct webusb_url_descriptor landing_url_descriptor = {
     .URL = LANDING_PAGE_URL
 };
 
-static int webusb_control_vendor_request(usbd_device *usbd_dev,
-                                     struct usb_setup_data *req,
-                                     uint8_t **buf, uint16_t *len,
-                                     usbd_control_complete_callback* complete) {
+static enum usbd_request_return_codes
+webusb_control_vendor_request(usbd_device *usbd_dev,
+                              struct usb_setup_data *req,
+                              uint8_t **buf, uint16_t *len,
+                              usbd_control_complete_callback* complete) {
     (void)complete;
     (void)usbd_dev;
 
@@ -61,7 +62,7 @@ static int webusb_control_vendor_request(usbd_device *usbd_dev,
         return USBD_REQ_NEXT_CALLBACK;
     }
 
-    int status = USBD_REQ_NOTSUPP;
+    enum usbd_request_return_codes status = USBD_REQ_NOTSUPP;
     switch (req->wIndex) {
         case WEBUSB_REQ_GET_URL: {
             if (req->wValue != 1) {

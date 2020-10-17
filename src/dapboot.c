@@ -27,9 +27,6 @@
 #include "winusb.h"
 #include "config.h"
 
-/* Used only in the high memory bootloader */
-extern volatile const vector_table_t vector_table;
-
 static inline void __set_MSP(uint32_t topOfMainStack) {
     asm("msr msp, %0" : : "r" (topOfMainStack));
 }

@@ -33,7 +33,6 @@ static const uint32_t CMD_BOOT = 0x544F4F42UL;
 void target_clock_setup(void) {
 
 //#define MODERN_LOCM3
-#ifdef MODERN_LOCM3
 	/* Clock struct for "any" board with a 16Mhz crystal */
 	const struct rcc_clock_scale myclock_16m_hse = {
 		.pll_source = RCC_CFGR_PLLSRC_HSE_CLK,
@@ -48,21 +47,6 @@ void target_clock_setup(void) {
 		.apb1_frequency = 32e6,
 		.apb2_frequency = 32e6,
 	};
-#else
-	const struct rcc_clock_scale myclock_16m_hse = {
-                .pll_source = RCC_CFGR_PLLSRC_HSE_CLK,
-                .pll_mul = RCC_CFGR_PLLMUL_MUL6,
-                .pll_div = RCC_CFGR_PLLDIV_DIV3,
-                .hpre = RCC_CFGR_HPRE_SYSCLK_NODIV,
-                .ppre1 = RCC_CFGR_PPRE1_HCLK_NODIV,
-                .ppre2 = RCC_CFGR_PPRE2_HCLK_NODIV,
-                .voltage_scale = PWR_SCALE1,
-                .flash_config = FLASH_ACR_LATENCY_1WS,
-                .ahb_frequency  = 32000000,
-                .apb1_frequency = 32000000,
-                .apb2_frequency = 32000000,
-        };
-#endif
 
 	rcc_clock_setup_pll(&myclock_16m_hse);
 }
