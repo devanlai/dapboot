@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libopencm3/cm3/scb.h>
 #include <libopencm3/cm3/vector.h>
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/dfu.h>
@@ -293,6 +294,11 @@ dfu_control_class_request(usbd_device *usbd_dev,
         }
 #endif
         case DFU_DETACH:
+            /* Best we can do! */
+            scb_reset_system();
+            status = USBD_REQ_HANDLED;
+            break;
+
         default: {
             /* Stall the control pipe */
             dfu_set_status(DFU_STATUS_ERR_STALLEDPKT);
