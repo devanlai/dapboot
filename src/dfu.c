@@ -94,6 +94,14 @@ static void dfu_on_download_complete(usbd_device* usbd_dev, struct usb_setup_dat
     dfu_set_state(STATE_DFU_MANIFEST_SYNC);
 }
 
+static void dfu_on_detach_complete(usbd_device* usbd_dev, struct usb_setup_data* req) {
+    (void)usbd_dev;
+    (void)req;
+
+    /* Reset and maybe launch the application */
+    scb_reset_system();
+}
+
 static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
@@ -293,11 +301,12 @@ dfu_control_class_request(usbd_device *usbd_dev,
             break;
         }
 #endif
-        case DFU_DETACH:
-            /* Best we can do! */
-            scb_reset_system();
+
+        case DFU_DETACH: {
+            *complete = &dfu_on_detach_complete;
             status = USBD_REQ_HANDLED;
             break;
+        }
 
         default: {
             /* Stall the control pipe */
