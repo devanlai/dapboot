@@ -50,7 +50,9 @@ static enum dfu_state current_dfu_state;
 static enum dfu_status current_dfu_status;
 static size_t current_dfu_offset;
 
-static uint8_t dfu_download_buffer[USB_CONTROL_BUF_SIZE];
+/* Alignment is required for m0 devices writing direct to flash,
+ * and irrelevant for other parts */
+static uint8_t dfu_download_buffer[USB_CONTROL_BUF_SIZE] __attribute__ ((aligned(4)));
 static size_t dfu_download_size;
 
 /* User callbacks */
