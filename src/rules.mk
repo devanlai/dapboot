@@ -44,6 +44,14 @@ ifeq ($(ARCH),STM32F1)
 	OOCD_BOARD ?= target/stm32f1x.cfg
 	OPENCM3_TARGET = "stm32/f1"
 endif
+ifeq ($(ARCH),STM32L0)
+	LIBNAME     = opencm3_stm32l0
+	DEFS       += -DSTM32L0
+	FP_FLAGS   ?= -msoft-float
+	ARCH_FLAGS  = -mthumb -mcpu=cortex-m0plus $(FP_FLAGS)
+	OOCD_BOARD ?= target/stm32l0.cfg
+	OPENCM3_TARGET = "stm32/l0"
+endif
 ifeq ($(ARCH),STM32L1)
 	LIBNAME     = opencm3_stm32l1
 	DEFS       += -DSTM32L1
