@@ -78,7 +78,7 @@
 #define USB_PULLUP_ACTIVE_HIGH 0
 #endif
 #ifndef USB_PULLUP_OPEN_DRAIN
-#define USB_PULLUP_OPEN_DRAIN 0
+#define USB_PULLUP_OPEN_DRAIN 1
 #endif
 
 #ifndef USES_GPIOA
