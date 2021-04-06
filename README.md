@@ -19,6 +19,7 @@ To build other targets, you can override the
 |`BLUEPILL`   | Cheap dev board | https://stm32duinoforum.com/forum/wiki_subdomain/index_title_Blue_Pill.html |
 |`MAPLEMINI`  | LeafLabs Maple Mini board and clone derivatives | https://stm32duinoforum.com/forum/wiki_subdomain/index_title_Maple_Mini.html |
 |`STLINK`     | STLink/v2 hardware clones | https://wiki.paparazziuav.org/wiki/STLink#Clones |
+|`OLIMEXSTM32H103` | Olimex STM32-H103 | https://www.olimex.com/Products/ARM/ST/STM32-H103/ |
 
 For each of the above targets, there are three variants that can be added to the target name:
 
