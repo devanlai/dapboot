@@ -39,7 +39,7 @@
 #define LED_GPIO_PORT GPIOC
 #endif
 #ifndef LED_GPIO_PIN
-#define LED_GPIO_PIN  GPIO14
+#define LED_GPIO_PIN  GPIO12
 #endif
 #ifndef LED_OPEN_DRAIN
 #define LED_OPEN_DRAIN 1
