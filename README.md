@@ -77,6 +77,12 @@ This bootloader implements the draft [WebUSB](https://wicg.github.io/webusb/) sp
 
 For a demo implementing dfu-util features in the browser, see https://devanlai.github.io/webdfu/dfu-util/
 
+To customize the WebUSB landing page, you can use the `LANDING_PAGE_URL` define. To set it from the command line, you can use the `DEFS` environment variable:
+
+    DEFS='-DLANDING_PAGE_URL=\"example.com/dfu-util/\"' make
+
+Note that the URL scheme shoul not be part of the `LANDING_PAGE_URL` string. As of this writing, it is hardcoded to HTTPS. 
+
 ## USB VID/PID
 The default USB VID/PID pair ([1209/DB42](http://pid.codes/1209/DB42/)) is allocated through the [pid.codes](http://pid.codes/) open-source USB PID program.
 
