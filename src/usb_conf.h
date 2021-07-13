@@ -21,8 +21,14 @@
 
 #include <libopencm3/usb/usbd.h>
 
+#ifndef USB_VID
 #define USB_VID                 0x1209
+#endif
+
+#ifndef USB_PID
 #define USB_PID                 0xdb42
+#endif
+
 #define USB_CONTROL_BUF_SIZE    1024
 #define USB_SERIAL_NUM_LENGTH   24
 #define INTF_DFU                0
