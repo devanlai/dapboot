@@ -78,7 +78,12 @@ This bootloader implements the draft [WebUSB](https://wicg.github.io/webusb/) sp
 For a demo implementing dfu-util features in the browser, see https://devanlai.github.io/webdfu/dfu-util/
 
 ## USB VID/PID
-The USB VID/PID pair ([1209/DB42](http://pid.codes/1209/DB42/)) is allocated through the [pid.codes](http://pid.codes/) open-source USB PID program.
+The default USB VID/PID pair ([1209/DB42](http://pid.codes/1209/DB42/)) is allocated through the [pid.codes](http://pid.codes/) open-source USB PID program.
+
+To use a custom VID/PID pair, you need to set the macros `USB_VID` and `USB_PID`. One way to do this is by setting the `DEFS` environment variable when compiling:
+
+     DEFS="-DUSB_VID=0x1209 -DUSB_PID=0xCAFE" make
+
 
 ## Licensing
 All contents of the dapboot project are licensed under terms that are compatible with the terms of the GNU Lesser General Public License version 3.
