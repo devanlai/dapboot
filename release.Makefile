@@ -33,14 +33,17 @@ all: dapboot-bluepill.bin \
      dapboot-maplemini.bin \
      dapboot-stlink.bin \
      dapboot-olimexstm32h103.bin \
+     dapboot-bluepillplusstm32.bin \
      dapboot-bluepill-high.bin \
      dapboot-maplemini-high.bin \
      dapboot-stlink-high.bin \
      dapboot-olimexstm32h103-high.bin \
+     dapboot-bluepillplusstm32-high.bin \
      dapboot-bluepill-high-128.bin \
      dapboot-maplemini-high-128.bin \
      dapboot-stlink-high-128.bin \
-     dapboot-olimexstm32h103-high-128.bin
+     dapboot-olimexstm32h103-high-128.bin \
+     dapboot-bluepillplusstm32-high-128.bin
 
 clean:
 	$(Q)$(RM) $(BUILD_DIR)/*.bin
@@ -75,6 +78,12 @@ dapboot-olimexstm32h103.bin: | $(BUILD_DIR)
 	$(Q)$(MAKE) TARGET=OLIMEXSTM32H103 -C src/
 	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
 
+dapboot-bluepillplusstm32.bin: | $(BUILD_DIR)
+	@printf "  BUILD $(@)\n"
+	$(Q)$(MAKE) TARGET=BLUEPILLPLUSSTM32 -C src/ clean
+	$(Q)$(MAKE) TARGET=BLUEPILLPLUSSTM32 -C src/
+	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+
 dapboot-bluepill-high.bin: | $(BUILD_DIR)
 	@printf "  BUILD $(@)\n"
 	$(Q)$(MAKE) TARGET=BLUEPILL_HIGH -C src/ clean
@@ -99,6 +108,12 @@ dapboot-olimexstm32h103-high.bin: | $(BUILD_DIR)
 	$(Q)$(MAKE) TARGET=OLIMEXSTM32H103_HIGH -C src/
 	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
 
+dapboot-bluepillplusstm32-high.bin: | $(BUILD_DIR)
+	@printf "  BUILD $(@)\n"
+	$(Q)$(MAKE) TARGET=BLUEPILLPLUSSTM32_HIGH -C src/ clean
+	$(Q)$(MAKE) TARGET=BLUEPILLPLUSSTM32_HIGH -C src/
+	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+
 dapboot-bluepill-high-128.bin: | $(BUILD_DIR)
 	@printf "  BUILD $(@)\n"
 	$(Q)$(MAKE) TARGET=BLUEPILL_HIGH_128 -C src/ clean
@@ -121,4 +136,10 @@ dapboot-olimexstm32h103-high-128.bin: | $(BUILD_DIR)
 	@printf "  BUILD $(@)\n"
 	$(Q)$(MAKE) TARGET=OLIMEXSTM32H103_HIGH_128 -C src/ clean
 	$(Q)$(MAKE) TARGET=OLIMEXSTM32H103_HIGH_128 -C src/
+	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+
+dapboot-bluepillplusstm32-high-128.bin: | $(BUILD_DIR)
+	@printf "  BUILD $(@)\n"
+	$(Q)$(MAKE) TARGET=BLUEPILLPLUSSTM32_HIGH_128 -C src/ clean
+	$(Q)$(MAKE) TARGET=BLUEPILLPLUSSTM32_HIGH_128 -C src/
 	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
