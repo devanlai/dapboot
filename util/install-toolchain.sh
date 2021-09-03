@@ -1,7 +1,14 @@
 #!/bin/bash
 set -eo pipefail
-URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2
+
+if [ `uname` == 'Darwin' ]; then
+TOOLCHAIN_ARCH=mac
+else
+TOOLCHAIN_ARCH=x86_64-linux
+fi
+TOOLCHAIN_REV=9-2019q4
 TOOLCHAIN=gcc-arm-none-eabi-9-2019-q4-major
+URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/${TOOLCHAIN_REV}/${TOOLCHAIN}-${TOOLCHAIN_ARCH}.tar.bz2
 TOOLCHAINS=$HOME/toolchains
 TOOLCHAIN_MISSING=0
 GCC=${TOOLCHAINS}/gcc-arm-embedded/bin/arm-none-eabi-gcc
