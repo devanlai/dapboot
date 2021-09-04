@@ -92,6 +92,11 @@ To use a custom VID/PID pair, you need to set the macros `USB_VID` and `USB_PID`
      DEFS="-DUSB_VID=0x1209 -DUSB_PID=0xCAFE" make
 
 
+## USB Vendor, Product, and Interface strings
+
+To customize the USB vendor, product, and interface strings that DAPBoot reports to the USB host, you may set the macros `USB_VENDOR_STRING`, `USB_PRODUCT_STRING`, and `USB_INTERFACE_STRING`, respectively. You can do this by setting the `DEFS` environment variable or including these macros in your board's `config.h`
+
+
 ## Licensing
 All contents of the dapboot project are licensed under terms that are compatible with the terms of the GNU Lesser General Public License version 3.
 

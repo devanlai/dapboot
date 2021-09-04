@@ -25,8 +25,27 @@
 #define USB_VID                 0x1209
 #endif
 
+#ifndef USB_VENDOR_STRING
+#define USB_VENDOR_STRING "Devanarchy"
+#endif
+
 #ifndef USB_PID
 #define USB_PID                 0xdb42
+#endif
+
+
+#ifndef USB_PRODUCT_STRING
+
+#ifdef BOOTLOADER_HIGH
+#define USB_PRODUCT_STRING "DAPBoot High-Memory DFU Bootloader"
+#else
+#define USB_PRODUCT_STRING "DAPBoot DFU Bootloader"
+#endif
+ 
+#endif
+
+#ifndef USB_INTERFACE_STRING
+#define USB_INTERFACE_STRING "DAPBoot DFU"
 #endif
 
 #define USB_CONTROL_BUF_SIZE    1024
