@@ -27,12 +27,14 @@ if [ $TOOLCHAIN_MISSING -eq 1 ]; then
     ln -s $TOOLCHAIN ${TOOLCHAINS}/gcc-arm-embedded
 fi;
 
-EXISTING_TOOLCHAIN=`readlink -f "${TOOLCHAINS}/gcc-arm-embedded"`
+EXISTING_TOOLCHAIN=`readlink "${TOOLCHAINS}/gcc-arm-embedded"`
 echo "Current toolchain is $EXISTING_TOOLCHAIN"
 
+if [ $TOOLCHAIN_ARCH != 'mac' ]; then
 if ! ldd ${GCC} >/dev/null; then
     echo "${GCC} does not appear to be executable on this machine"
     exit 1
+fi;
 fi;
 
 TOOLCHAIN_VER=`${GCC} --version | head -n 1`
