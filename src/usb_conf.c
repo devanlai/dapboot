@@ -25,6 +25,7 @@
 #include "dfu.h"
 #include "webusb.h"
 
+#include "config.h"
 #include "usb_conf.h"
 
 static const struct usb_device_descriptor dev = {

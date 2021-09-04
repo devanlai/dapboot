@@ -21,11 +21,11 @@
 
 #include "dapboot.h"
 #include "target.h"
+#include "config.h"
 #include "usb_conf.h"
 #include "dfu.h"
 #include "webusb.h"
 #include "winusb.h"
-#include "config.h"
 
 static inline void __set_MSP(uint32_t topOfMainStack) {
     asm("msr msp, %0" : : "r" (topOfMainStack));

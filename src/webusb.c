@@ -19,8 +19,8 @@
 #include <libopencm3/usb/usbd.h>
 #include "webusb.h"
 
-#include "usb_conf.h"
 #include "config.h"
+#include "usb_conf.h"
 
 #ifndef LANDING_PAGE_URL
 #define LANDING_PAGE_URL "devanlai.github.io/webdfu/dfu-util/"
