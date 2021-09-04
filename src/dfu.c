@@ -25,11 +25,11 @@
 #include <libopencm3/usb/dfu.h>
 
 #include "dfu.h"
+#include "config.h"
 #include "usb_conf.h"
 #include "dfu_defs.h"
 #include "target.h"
 #include "dapboot.h"
-#include "config.h"
 
 #ifndef TARGET_DFU_WTRANSFERSIZE
 #define TARGET_DFU_WTRANSFERSIZE USB_CONTROL_BUF_SIZE

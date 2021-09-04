@@ -19,6 +19,7 @@
 #include <libopencm3/usb/usbd.h>
 #include "winusb.h"
 
+#include "config.h"
 #include "usb_conf.h"
 
 static const struct winusb_compatible_id_descriptor winusb_wcid = {
