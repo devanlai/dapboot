@@ -45,44 +45,6 @@ static const struct usb_device_descriptor dev = {
     .bNumConfigurations = 1,
 };
 
-static const struct usb_interface_descriptor dfu_iface = {
-    .bLength = USB_DT_INTERFACE_SIZE,
-    .bDescriptorType = USB_DT_INTERFACE,
-    .bInterfaceNumber = INTF_DFU,
-    .bAlternateSetting = 0,
-    .bNumEndpoints = 0,
-    .bInterfaceClass = 0xFE,
-    .bInterfaceSubClass = 1,
-    .bInterfaceProtocol = 2,
-    .iInterface = 4,
-
-    .endpoint = NULL,
-
-    .extra = &dfu_function,
-    .extralen = sizeof(dfu_function),
-};
-
-static const struct usb_interface interfaces[] = {
-    /* DFU interface */
-    {
-        .num_altsetting = 1,
-        .altsetting = &dfu_iface,
-    }
-};
-
-static const struct usb_config_descriptor config = {
-    .bLength = USB_DT_CONFIGURATION_SIZE,
-    .bDescriptorType = USB_DT_CONFIGURATION,
-    .wTotalLength = 0,
-    .bNumInterfaces = sizeof(interfaces)/sizeof(struct usb_interface),
-    .bConfigurationValue = 1,
-    .iConfiguration = 0,
-    .bmAttributes = 0xC0,
-    .bMaxPower = 0x32,
-
-    .interface = interfaces,
-};
-
 static const struct usb_device_capability_descriptor* capabilities[] = {
     (const struct usb_device_capability_descriptor*)&webusb_platform,
 };
@@ -119,7 +81,7 @@ usbd_device* usb_setup(void) {
     int num_strings = sizeof(usb_strings)/sizeof(const char*);
 
     const usbd_driver* driver = target_usb_init();
-    usbd_device* usbd_dev = usbd_init(driver, &dev, &config, &bos,
+    usbd_device* usbd_dev = usbd_init(driver, &dev, target_usb_descriptor(), &bos,
                                       usb_strings, num_strings,
                                       usbd_control_buffer, sizeof(usbd_control_buffer));
 

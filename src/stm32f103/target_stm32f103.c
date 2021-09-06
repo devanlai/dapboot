@@ -29,6 +29,7 @@
 #include "target.h"
 #include "config.h"
 #include "backup.h"
+#include "usb_descriptor.h"
 
 #ifndef USES_GPIOA
 #if (HAVE_USB_PULLUP_CONTROL == 0)
@@ -155,6 +156,10 @@ const usbd_driver* target_usb_init(void) {
 #endif
 
     return &st_usbfs_v1_usb_driver;
+}
+
+const struct usb_config_descriptor* target_usb_descriptor(void) {
+    return &usb_config;
 }
 
 bool target_get_force_bootloader(void) {
