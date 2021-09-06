@@ -40,7 +40,7 @@ const struct usb_dfu_descriptor dfu_function = {
     .bDescriptorType = DFU_FUNCTIONAL,
     .bmAttributes = ((DFU_DOWNLOAD_AVAILABLE ? USB_DFU_CAN_DOWNLOAD : 0) |
                      (DFU_UPLOAD_AVAILABLE ? USB_DFU_CAN_UPLOAD : 0) |
-                     USB_DFU_WILL_DETACH ),
+                     USB_DFU_MANIFEST_TOLERANT),
     .wDetachTimeout = 255,
     .wTransferSize = TARGET_DFU_WTRANSFERSIZE,
     .bcdDFUVersion = 0x0110,
@@ -106,7 +106,6 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
     (void)usbd_dev;
     (void)req;
 
-
     if (DFU_PATCH_VECTORS && current_dfu_offset == 0) {
         if (dfu_download_size < offsetof(vector_table_t, reserved_x001c[1])) {
             /* Can't handle splitting the vector table right now */
@@ -144,10 +143,9 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
 static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
+
     if (dfu_manifest_request_callback) {
         dfu_manifest_request_callback();
-    } else {
-        dfu_set_status(DFU_STATUS_ERR_UNKNOWN);
     }
 }
 
@@ -183,7 +181,7 @@ dfu_control_class_request(usbd_device *usbd_dev,
                 }
                 case STATE_DFU_MANIFEST_SYNC: {
                     if (validate_application()) {
-                        dfu_set_state(STATE_DFU_MANIFEST);
+                        dfu_set_state(STATE_DFU_IDLE);
                         *complete = &dfu_on_manifest_request;
                     } else {
                         dfu_set_status(DFU_STATUS_ERR_FIRMWARE);

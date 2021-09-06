@@ -29,7 +29,7 @@ typedef void (*StateChangeCallback)(enum dfu_state);
 typedef void (*StatusChangeCallback)(enum dfu_status);
 
 extern void dfu_setup(usbd_device* usbd_dev,
-                      GenericCallback on_detach_request,
+                      GenericCallback on_manifest_request,
                       StateChangeCallback on_state_change,
                       StatusChangeCallback on_status_change);
 
