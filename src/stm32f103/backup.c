@@ -29,13 +29,13 @@ void backup_write(enum BackupRegister reg, uint32_t value) {
     rcc_periph_clock_enable(RCC_BKP);
 
     pwr_disable_backup_domain_write_protect();
-    RTC_BKP_DR((int)reg*2) = value & 0xFFFFUL;
-    RTC_BKP_DR((int)reg*2+1) = (value & 0xFFFF0000UL) >> 16;
+    RTC_BKP_DR((int)reg) = value & 0xFFFFUL;
+    RTC_BKP_DR((int)reg+1) = (value & 0xFFFF0000UL) >> 16;
     pwr_enable_backup_domain_write_protect();
 }
 
 uint32_t backup_read(enum BackupRegister reg) {
-    uint32_t value = ((uint32_t)RTC_BKP_DR((int)reg*2+1) << 16)
-                   | ((uint32_t)RTC_BKP_DR((int)reg*2) << 0);
+    uint32_t value = (uint32_t)RTC_BKP_DR((int)reg)
+                   | ((uint32_t)RTC_BKP_DR((int)reg+1) << 16);
     return value;
 }

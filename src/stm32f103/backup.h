@@ -20,11 +20,16 @@
 #define BACKUP_H_INCLUDED
 
 enum BackupRegister {
-    BKP0 = 0,
     BKP1,
     BKP2,
     BKP3,
     BKP4,
+    BKP5,
+    BKP6,
+    BKP7,
+    BKP8,
+    BKP9,
+    BKP10,
 };
 
 extern void backup_write(enum BackupRegister reg, uint32_t value);
