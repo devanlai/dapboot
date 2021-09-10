@@ -32,6 +32,9 @@
 #ifndef DFU_DOWNLOAD_AVAILABLE
 #define DFU_DOWNLOAD_AVAILABLE 1
 #endif
+#ifndef DFU_WILL_DETACH
+#define DFU_WILL_DETACH 0
+#endif
 
 /* There is a PCB-mounted status LED, but it's unreadable when the board is installed,
  * and additionally it's wired to SWDIO so toggling it manually is a bad idea */
@@ -89,8 +92,8 @@
 #define CMD_BOOT 1
 #endif
 
-#ifndef USB_ALT
-#define USB_ALT 2
+#ifndef USB_DFU_ALTN
+#define USB_DFU_ALTN 2
 #endif
 
 #endif
