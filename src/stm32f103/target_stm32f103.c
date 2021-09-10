@@ -60,7 +60,7 @@ _Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
 #endif
 
 #ifndef CMD_BOOT
-#define CMD_BOOT 0x544F4F42UL
+#define CMD_BOOT 0x4F42UL
 #endif
 
 void target_clock_setup(void) {
@@ -166,7 +166,7 @@ const usbd_driver* target_usb_init(void) {
 bool target_get_force_bootloader(void) {
     bool force = false;
     /* Check the RTC backup register */
-    uint32_t cmd = backup_read(REG_BOOT);
+    uint16_t cmd = backup_read(REG_BOOT);
     if (cmd == CMD_BOOT) {
         force = true;
     }
