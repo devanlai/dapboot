@@ -24,9 +24,9 @@
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/dfu.h>
 
-#include "dfu.h"
 #include "config.h"
 #include "usb_conf.h"
+#include "dfu.h"
 #include "dfu_defs.h"
 #include "target.h"
 #include "dapboot.h"
@@ -40,7 +40,8 @@ const struct usb_dfu_descriptor dfu_function = {
     .bDescriptorType = DFU_FUNCTIONAL,
     .bmAttributes = ((DFU_DOWNLOAD_AVAILABLE ? USB_DFU_CAN_DOWNLOAD : 0) |
                      (DFU_UPLOAD_AVAILABLE ? USB_DFU_CAN_UPLOAD : 0) |
-                     USB_DFU_MANIFEST_TOLERANT),
+                     (DFU_WILL_DETACH ? 0 : USB_DFU_MANIFEST_TOLERANT) |
+                     (DFU_WILL_DETACH ? USB_DFU_WILL_DETACH : 0)),
     .wDetachTimeout = 255,
     .wTransferSize = TARGET_DFU_WTRANSFERSIZE,
     .bcdDFUVersion = 0x0110,
@@ -87,12 +88,14 @@ static inline void dfu_set_status(enum dfu_status status) {
     current_dfu_status = status;
 }
 
+#if !DFU_WILL_DETACH
 static void dfu_on_download_complete(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
     
     dfu_set_state(STATE_DFU_MANIFEST_SYNC);
 }
+#endif
 
 static void dfu_on_detach_complete(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
@@ -140,6 +143,7 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
     }
 }
 
+#if !DFU_WILL_DETACH
 static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
@@ -148,6 +152,7 @@ static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data
         dfu_manifest_request_callback();
     }
 }
+#endif
 
 static enum usbd_request_return_codes
 dfu_control_class_request(usbd_device *usbd_dev,
@@ -179,6 +184,7 @@ dfu_control_class_request(usbd_device *usbd_dev,
                     *complete = &dfu_on_download_request;
                     break;
                 }
+#if !DFU_WILL_DETACH
                 case STATE_DFU_MANIFEST_SYNC: {
                     if (validate_application()) {
                         dfu_set_state(STATE_DFU_IDLE);
@@ -188,6 +194,7 @@ dfu_control_class_request(usbd_device *usbd_dev,
                     }
                     break;
                 }
+#endif
 #endif
                 default: {
                     break;
@@ -227,7 +234,11 @@ dfu_control_class_request(usbd_device *usbd_dev,
                         memcpy(dfu_download_buffer, *buf, dfu_download_size);
                         dfu_set_state(STATE_DFU_DNLOAD_SYNC);
                     } else {
+#if DFU_WILL_DETACH
+                        *complete = &dfu_on_detach_complete;
+#else
                         *complete = &dfu_on_download_complete;
+#endif
                     }
                     break;
                 }
