@@ -45,6 +45,78 @@ static const struct usb_device_descriptor dev = {
     .bNumConfigurations = 1,
 };
 
+// Macro to create a dummy (no-op) USB interface descriptor with the given alternate setting
+#define ALT_DUMMY(N) {                      \
+    .bLength = USB_DT_INTERFACE_SIZE,       \
+    .bDescriptorType = USB_DT_INTERFACE,    \
+    .bInterfaceNumber = INTF_DFU,           \
+    .bAlternateSetting = (N),               \
+    .bNumEndpoints = 0,                     \
+    .bInterfaceClass = 0,                   \
+    .bInterfaceSubClass = 0,                \
+    .bInterfaceProtocol = 0,                \
+    .iInterface = 0,                        \
+    .endpoint = NULL,                       \
+    .extra = NULL,                          \
+    .extralen = 0,                          \
+},
+
+// Functionality for creating repetitive ALT_DUMMY structs with an increasing count during compile time.
+// It doesn't look very nice, but C doesn't allow loops in preprocessor macros, so this needs to be hard-coded.
+#define ALT0
+#define ALT1 ALT_DUMMY(0)
+#define ALT2 ALT1 ALT_DUMMY(1)
+#define ALT3 ALT2 ALT_DUMMY(2)
+#define ALT4 ALT3 ALT_DUMMY(3)
+#define ALT5 ALT4 ALT_DUMMY(4)
+#define ALTW(n) ALT##n // Wrapper macro for expansion
+#define ALTN(n) ALTW(n)
+
+static const struct usb_interface_descriptor altsettings[] = {
+    ALTN(USB_DFU_ALTN) // Prepend USB_DFU_ALTN dummy USB interface descriptors to "pad" the real one
+    {
+        .bLength = USB_DT_INTERFACE_SIZE,
+        .bDescriptorType = USB_DT_INTERFACE,
+        .bInterfaceNumber = INTF_DFU,
+        .bAlternateSetting = USB_DFU_ALTN,
+        .bNumEndpoints = 0,
+        .bInterfaceClass = 0xFE,
+        .bInterfaceSubClass = 1,
+        .bInterfaceProtocol = 2,
+        .iInterface = 4,
+
+        .endpoint = NULL,
+
+        .extra = &dfu_function,
+        .extralen = sizeof(dfu_function),
+    }
+};
+
+// Tracking this is mandatory if exposing multiple altsettings
+static uint8_t cur_altsetting = 0;
+
+static const struct usb_interface interfaces[] = {
+    /* DFU interface */
+    {
+        .cur_altsetting = &cur_altsetting,
+        .num_altsetting = USB_DFU_ALTN + 1,
+        .altsetting = (const struct usb_interface_descriptor*)&altsettings,
+    }
+};
+
+static const struct usb_config_descriptor config = {
+    .bLength = USB_DT_CONFIGURATION_SIZE,
+    .bDescriptorType = USB_DT_CONFIGURATION,
+    .wTotalLength = 0,
+    .bNumInterfaces = sizeof(interfaces)/sizeof(struct usb_interface),
+    .bConfigurationValue = 1,
+    .iConfiguration = 0,
+    .bmAttributes = 0xC0,
+    .bMaxPower = 0x32,
+
+    .interface = interfaces,
+};
+
 static const struct usb_device_capability_descriptor* capabilities[] = {
     (const struct usb_device_capability_descriptor*)&webusb_platform,
 };
@@ -81,7 +153,7 @@ usbd_device* usb_setup(void) {
     int num_strings = sizeof(usb_strings)/sizeof(const char*);
 
     const usbd_driver* driver = target_usb_init();
-    usbd_device* usbd_dev = usbd_init(driver, &dev, target_usb_descriptor(), &bos,
+    usbd_device* usbd_dev = usbd_init(driver, &dev, &config, &bos,
                                       usb_strings, num_strings,
                                       usbd_control_buffer, sizeof(usbd_control_buffer));
 

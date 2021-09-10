@@ -26,7 +26,6 @@
 #include "target.h"
 #include "config.h"
 #include "backup.h"
-#include "usb_descriptor.h"
 
 //#define CMD_FAST_BOOT 0xfa57b007
 static const uint32_t CMD_BOOT = 0x544F4F42UL;
@@ -74,11 +73,6 @@ const usbd_driver* target_usb_init(void)
         SYSCFG_PMC |= SYSCFG_PMC_USB_PU;
 
 	return &st_usbfs_v1_usb_driver;
-}
-
-const struct usb_config_descriptor* target_usb_descriptor(void)
-{
-    return &usb_config;
 }
 
 /* This implementation will always start in bootloader, unless the app
