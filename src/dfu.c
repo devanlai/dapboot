@@ -331,6 +331,10 @@ dfu_control_class_request(usbd_device *usbd_dev,
     return status;
 }
 
+/* Track dfu enumeration status to distinguish between the first USB
+   reset after bootup versus a subsequent USB reset and re-enumeration */
+static bool dfu_enumerated = false;
+
 static void dfu_set_config(usbd_device* usbd_dev, uint16_t wValue) {
     (void)wValue;
 
@@ -339,6 +343,35 @@ static void dfu_set_config(usbd_device* usbd_dev, uint16_t wValue) {
         USB_REQ_TYPE_CLASS | USB_REQ_TYPE_INTERFACE,
         USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
         dfu_control_class_request);
+
+    dfu_enumerated = true;
+}
+
+static void dfu_on_usb_reset(void) {
+    /* Ignore the first USB reset after boot, before anyone has had
+       a chance to do anything to the device; otherwise we'd never
+       enter DFU mode when the application is valid */
+    if (!dfu_enumerated) {
+        return;
+    }
+
+    /* On subsequent USB reset requests, either manifest by resetting
+       or enter the error state if firmware is invalid, per the spec */
+    if (validate_application()) {
+        /* Manifest by resetting after responding */
+        dfu_set_state(STATE_DFU_MANIFEST);
+
+        if (dfu_manifest_request_callback) {
+            dfu_manifest_request_callback();
+        }
+
+        /* Reset and launch the application if the manifest callback
+           didn't already do it */
+        scb_reset_system();
+    } else {
+        /* Enter the error state and await further commands */
+        dfu_set_status(DFU_STATUS_ERR_FIRMWARE);
+    }
 }
 
 void dfu_setup(usbd_device* usbd_dev,
@@ -349,6 +382,7 @@ void dfu_setup(usbd_device* usbd_dev,
     dfu_state_change_callback = on_state_change;
     dfu_status_change_callback = on_status_change;
 
+    usbd_register_reset_callback(usbd_dev, dfu_on_usb_reset);
     usbd_register_set_config_callback(usbd_dev, dfu_set_config);
     current_dfu_state = STATE_DFU_IDLE;
     current_dfu_status = DFU_STATUS_OK;
