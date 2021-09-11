@@ -24,8 +24,8 @@
 
 void target_get_serial_number(char* dest, size_t max_chars) __attribute__((weak));
 void target_log(const char* str) __attribute__((weak));
-void target_manifest_app(void) __attribute__((weak));
 void target_pre_main(void) __attribute__((weak));
+void target_pre_detach(bool manifested) __attribute__((weak));
 size_t target_get_timeout(void) __attribute__((weak));
 
 void target_get_serial_number(char* dest, size_t max_chars) {
@@ -39,13 +39,18 @@ void target_log(const char* str) {
     (void)str;
 }
 
-void target_manifest_app(void) {
-    scb_reset_system();
-}
-
 void target_pre_main(void)
 {
 
+}
+
+void target_pre_detach(bool manifested) {
+    /* This runs just before executing a reboot in response to a USB bus reset
+       or a detach request.
+       If new firmware was successfully downloaded, manifested is set to true.
+       This can be used to set flags or blink LEDs before rebooting.
+     */
+    (void)manifested;
 }
 
 size_t target_get_timeout(void)

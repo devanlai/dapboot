@@ -101,6 +101,9 @@ static void dfu_on_detach_complete(usbd_device* usbd_dev, struct usb_setup_data*
     (void)usbd_dev;
     (void)req;
 
+    /* Run the target-specific pre-detach hook before resetting */
+    target_pre_detach(manifestation_complete);
+
     /* Reset and maybe launch the application */
     scb_reset_system();
 }
@@ -149,13 +152,17 @@ static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data
 
     if (dfu_manifest_request_callback) {
         /* The manifestation callback returns a boolean indicating if it succeeded */
-        if (dfu_manifest_request_callback()) {
-            manifestation_complete = true;
-            dfu_set_state(STATE_DFU_MANIFEST_SYNC);
-        } else {
-            dfu_set_status(DFU_STATUS_ERR_FIRMWARE);
-            return; /* Avoid resetting on error */
-        }
+        manifestation_complete = dfu_manifest_request_callback();
+    } else {
+        /* Assume manifestation success */
+        manifestation_complete = true;
+    }
+
+    if (manifestation_complete) {
+        dfu_set_state(STATE_DFU_MANIFEST_SYNC);
+    } else {
+        dfu_set_status(DFU_STATUS_ERR_FIRMWARE);
+        return; /* Avoid resetting on error */
     }
 
 #if DFU_WILL_DETACH
@@ -202,7 +209,6 @@ dfu_control_class_request(usbd_device *usbd_dev,
                      * the device is manifestation tolerant (DFU_WILL_DETACH == 0) */
                     if (manifestation_complete) {
                         /* Only enter idle state after manifestation has completed successfully */
-                        manifestation_complete = false;
                         dfu_set_state(STATE_DFU_IDLE);
                     } else {
                         /* Perform manifestation after download as described in the
@@ -239,6 +245,8 @@ dfu_control_class_request(usbd_device *usbd_dev,
                         dfu_download_size = req->wLength;
                         memcpy(dfu_download_buffer, *buf, dfu_download_size);
                         dfu_set_state(STATE_DFU_DNLOAD_SYNC);
+                        /* Reset manifestation progress on new download */
+                        manifestation_complete = false;
                     } else {
                         dfu_set_status(DFU_STATUS_ERR_STALLEDPKT);
                         usbd_ep_stall_set(usbd_dev, 0x00, 1);
