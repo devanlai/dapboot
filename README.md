@@ -68,9 +68,11 @@ The high memory bootloaders do not use the lower part of the flash, so you only 
 
 
 ### Switching to the bootloader
-The bootloader can be built to look for arbitrary patterns, but the default for the STM32F103 target looks for a magic value stored in the RTC backup registers. Writing the magic value and then resetting will run the bootloader instead of the main application.
+The bootloader can be built to look for arbitrary patterns, but the default looks for a magic value stored in the RTC backup registers. Writing the magic value and then resetting will run the bootloader instead of the main application.
 
-The bootloader currently looks for `0x544F` in RTC backup register 1 and `0x4F42` in RTC backup register 0 (together they spell "BOOT" in ASCII).
+In version v1.11 and earlier, the bootloader for STM32F103 targets looks for `0x544F` in RTC backup register 1 and `0x4F42` in RTC backup register 0 (together they spell "BOOT" in ASCII). In the current master branch and any subsequent releases, the bootloader will only use RTC backup register 0 and check for `0x4F42` on targets with 16-bit backup registers and `0x544F4F42` on targets with 32-bit backup registers.
+
+The backup register and bootloader command word can be customized with the `REG_BOOT` and `CMD_BOOT` defines respectively.
 
 You can also use a button to stay in bootloader while booting. It's configured using `HAVE_BUTTON` define. If your button has a debounce capacitor, you can use `BUTTON_SAMPLE_DELAY_CYCLES` define to specify how many cycles to wait before sampling the I/O pin, by default it is approximately 20ms in a 72Mhz MCU.
 
@@ -86,6 +88,13 @@ To customize the WebUSB landing page, you can use the `LANDING_PAGE_URL` define.
     DEFS='-DLANDING_PAGE_URL=\"example.com/dfu-util/\"' make
 
 Note that the URL scheme shoul not be part of the `LANDING_PAGE_URL` string. As of this writing, it is hardcoded to HTTPS. 
+
+### Manifestation behavior
+There are two different manifestation behaviors that can be selected using the `DFU_WILL_DETACH` define. By default, `DFU_WILL_DETACH` is set to 1 for backwards compatibility with existing behavior.
+
+When `DFU_WILL_DETACH` is enabled, the bootloader autonomously reboot into the new firmware after it has been successfully downloaded and passes the basic validation check. This can be helpful on platforms such as Windows where it is not possible to generate a USB bus reset to signal that the bootloader should switch to the application.
+
+When `DFU_WILL_DETACH` is disabled, the bootloader will return to the idle state after validating the firmware. The DFU host application can then perform other operations or reboot the target into the new firmware by issuing a DFU detach request or generating a USB bus reset. (This can be done with `dfu-util` by passing the `-R` flag).
 
 ## USB VID/PID
 The default USB VID/PID pair ([1209/DB42](http://pid.codes/1209/DB42/)) is allocated through the [pid.codes](http://pid.codes/) open-source USB PID program.
