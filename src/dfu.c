@@ -51,6 +51,8 @@ static enum dfu_state current_dfu_state;
 static enum dfu_status current_dfu_status;
 static size_t current_dfu_offset;
 
+static bool dfu_modified_firmware = false;
+
 static uint8_t dfu_download_buffer[USB_CONTROL_BUF_SIZE];
 static size_t dfu_download_size;
 
@@ -131,6 +133,9 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
     bool ok = target_flash_program_array(dest, data, dfu_download_size/2);
     target_flash_lock();
 
+    /* Record that we touched the application firmware */
+    dfu_modified_firmware = true;
+
     if (ok) {
         current_dfu_offset += dfu_download_size;
         /* We could go back to STATE_DFU_DNLOAD_SYNC, but then
@@ -141,7 +146,6 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
     }
 }
 
-#if DFU_WILL_DETACH
 static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
@@ -154,7 +158,6 @@ static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data
        didn't already do it */
     scb_reset_system();
 }
-#endif
 
 static enum usbd_request_return_codes
 dfu_control_class_request(usbd_device *usbd_dev,
@@ -314,7 +317,11 @@ dfu_control_class_request(usbd_device *usbd_dev,
 #endif
 
         case DFU_DETACH: {
-            *complete = &dfu_on_detach_complete;
+            if (dfu_modified_firmware) {
+                *complete = &dfu_on_manifest_request;
+            } else {
+                *complete = &dfu_on_detach_complete;
+            }
             status = USBD_REQ_HANDLED;
             break;
         }
@@ -355,14 +362,16 @@ static void dfu_on_usb_reset(void) {
         return;
     }
 
-    /* On subsequent USB reset requests, either manifest by resetting
+    /* On subsequent USB reset requests, either reset/manifest
        or enter the error state if firmware is invalid, per the spec */
     if (validate_application()) {
-        /* Manifest by resetting after responding */
-        dfu_set_state(STATE_DFU_MANIFEST);
+        if (dfu_modified_firmware) {
+            /* Manifest by resetting after responding */
+            dfu_set_state(STATE_DFU_MANIFEST);
 
-        if (dfu_manifest_request_callback) {
-            dfu_manifest_request_callback();
+            if (dfu_manifest_request_callback) {
+                dfu_manifest_request_callback();
+            }
         }
 
         /* Reset and launch the application if the manifest callback
