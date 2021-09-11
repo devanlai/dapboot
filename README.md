@@ -21,14 +21,17 @@ To build other targets, you can override the
 |`STLINK`     | STLink/v2 hardware clones | https://wiki.paparazziuav.org/wiki/STLink#Clones |
 |`OLIMEXSTM32H103` | Olimex STM32-H103 | https://www.olimex.com/Products/ARM/ST/STM32-H103/ |
 |`BLUEPILLPLUSSTM32` | Bluepill with USB C | https://github.com/WeActTC/BluePill-Plus/ |
+|`BTTSKRMINIE3V2` | BigTreeTech SKR MINI E3 V2.0 (3D printer motherboard) | https://github.com/bigtreetech/BIGTREETECH-SKR-mini-E3 |
+|`BTTSKRMINIE3V2_USBMOD` | BTT SKR MINI E3 V2.0 with USB pullup removed | https://github.com/bigtreetech/BIGTREETECH-SKR-mini-E3 |
 
-For each of the above targets, there are three variants that can be added to the target name:
+For the above targets there are some potential variants that can be added to the target name based on what the target supports:
 
 | Target Variant | Description                                           |
 | -------------- | ----------------------------------------------------- |
 |` `             | Standard bootloader, using first 8kB of flash         |
 |`_HIGH`         | High memory bootloader for 64kB chips  (experimental) |
 |`_HIGH_128`     | High memory bootloader for 128kB chips (experimental) |
+|`_HIGH_256`     | High memory bootloader for 256kB chips (experimental) |
 
 The high memory bootloader is a variation that doesn't require the application to be at an offset, the bootloader resides in the top 6.5kB of ROM and hides its reset and stack vectors inside unused entries of the application vector table. As an example, to compile for a Bluepill board with 128kB flash, use:
 

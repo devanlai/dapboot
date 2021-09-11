@@ -17,16 +17,14 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Linker script for STM32F103x8, 64k flash, 20k RAM.
- * This script also works for the STM32F103xB and the STM32F103xC,
- * as the bootloader only uses the first 8kB of flash. */
+/* Linker script for STM32F103xC, 256k flash, 48k RAM. */
 
 /* Define memory regions. */
 MEMORY
 {
 	vectors (rx) : ORIGIN = 0x08000000, LENGTH = 0x150
-	rom (rx)  : ORIGIN = 0x08000150, LENGTH = 0x1EB0
-	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 20K
+	rom (rx)  : ORIGIN = 0x0803e600, LENGTH = 0x1A00
+	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 48K
 }
 
 /* Include the common ld script. */
