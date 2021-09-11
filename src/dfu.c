@@ -88,14 +88,12 @@ static inline void dfu_set_status(enum dfu_status status) {
     current_dfu_status = status;
 }
 
-#if !DFU_WILL_DETACH
 static void dfu_on_download_complete(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
-    
+
     dfu_set_state(STATE_DFU_MANIFEST_SYNC);
 }
-#endif
 
 static void dfu_on_detach_complete(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
@@ -143,7 +141,7 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
     }
 }
 
-#if !DFU_WILL_DETACH
+#if DFU_WILL_DETACH
 static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
@@ -151,6 +149,10 @@ static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data
     if (dfu_manifest_request_callback) {
         dfu_manifest_request_callback();
     }
+
+    /* Reset and maybe launch the application if the manifest callback
+       didn't already do it */
+    scb_reset_system();
 }
 #endif
 
@@ -184,17 +186,21 @@ dfu_control_class_request(usbd_device *usbd_dev,
                     *complete = &dfu_on_download_request;
                     break;
                 }
-#if !DFU_WILL_DETACH
                 case STATE_DFU_MANIFEST_SYNC: {
                     if (validate_application()) {
-                        dfu_set_state(STATE_DFU_IDLE);
+#if DFU_WILL_DETACH
+                        /* Manifest by resetting after responding */
+                        dfu_set_state(STATE_DFU_MANIFEST);
                         *complete = &dfu_on_manifest_request;
+#else
+                        /* Return to the idle state and await commands */
+                        dfu_set_state(STATE_DFU_IDLE);
+#endif
                     } else {
                         dfu_set_status(DFU_STATUS_ERR_FIRMWARE);
                     }
                     break;
                 }
-#endif
 #endif
                 default: {
                     break;
@@ -234,11 +240,7 @@ dfu_control_class_request(usbd_device *usbd_dev,
                         memcpy(dfu_download_buffer, *buf, dfu_download_size);
                         dfu_set_state(STATE_DFU_DNLOAD_SYNC);
                     } else {
-#if DFU_WILL_DETACH
-                        *complete = &dfu_on_detach_complete;
-#else
                         *complete = &dfu_on_download_complete;
-#endif
                     }
                     break;
                 }
