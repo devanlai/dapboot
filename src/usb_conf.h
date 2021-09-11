@@ -33,6 +33,10 @@
 #define USB_PID                 0xdb42
 #endif
 
+// The DFU interface doesn't have any special alternate setting by default
+#ifndef USB_DFU_ALTN
+#define USB_DFU_ALTN 0
+#endif
 
 #ifndef USB_PRODUCT_STRING
 
