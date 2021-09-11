@@ -22,14 +22,19 @@
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/dfu.h>
 
+// For WebUSB compatibility
+#ifndef DFU_WILL_DETACH
+#define DFU_WILL_DETACH 1
+#endif
+
 extern const struct usb_dfu_descriptor dfu_function;
 
-typedef void (*GenericCallback)(void);
+typedef bool (*ManifestationCallback)(void);
 typedef void (*StateChangeCallback)(enum dfu_state);
 typedef void (*StatusChangeCallback)(enum dfu_status);
 
 extern void dfu_setup(usbd_device* usbd_dev,
-                      GenericCallback on_detach_request,
+                      ManifestationCallback on_manifest_request,
                       StateChangeCallback on_state_change,
                       StatusChangeCallback on_status_change);
 

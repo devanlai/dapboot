@@ -22,11 +22,11 @@
 
 #include <libopencm3/usb/dfu.h>
 #include "target.h"
-#include "dfu.h"
 #include "webusb.h"
 
 #include "config.h"
 #include "usb_conf.h"
+#include "dfu.h"
 
 static const struct usb_device_descriptor dev = {
     .bLength = USB_DT_DEVICE_SIZE,

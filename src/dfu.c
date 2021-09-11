@@ -24,9 +24,9 @@
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/dfu.h>
 
-#include "dfu.h"
 #include "config.h"
 #include "usb_conf.h"
+#include "dfu.h"
 #include "dfu_defs.h"
 #include "target.h"
 #include "dapboot.h"
@@ -40,7 +40,8 @@ const struct usb_dfu_descriptor dfu_function = {
     .bDescriptorType = DFU_FUNCTIONAL,
     .bmAttributes = ((DFU_DOWNLOAD_AVAILABLE ? USB_DFU_CAN_DOWNLOAD : 0) |
                      (DFU_UPLOAD_AVAILABLE ? USB_DFU_CAN_UPLOAD : 0) |
-                     USB_DFU_WILL_DETACH ),
+                     (DFU_WILL_DETACH ? 0 : USB_DFU_MANIFEST_TOLERANT) |
+                     (DFU_WILL_DETACH ? USB_DFU_WILL_DETACH : 0)),
     .wDetachTimeout = 255,
     .wTransferSize = TARGET_DFU_WTRANSFERSIZE,
     .bcdDFUVersion = 0x0110,
@@ -50,11 +51,13 @@ static enum dfu_state current_dfu_state;
 static enum dfu_status current_dfu_status;
 static size_t current_dfu_offset;
 
+static bool manifestation_complete = false;
+
 static uint8_t dfu_download_buffer[USB_CONTROL_BUF_SIZE];
 static size_t dfu_download_size;
 
 /* User callbacks */
-static GenericCallback dfu_manifest_request_callback = NULL;
+static ManifestationCallback dfu_manifest_request_callback = NULL;
 static StateChangeCallback dfu_state_change_callback = NULL;
 static StatusChangeCallback dfu_status_change_callback = NULL;
 
@@ -90,7 +93,7 @@ static inline void dfu_set_status(enum dfu_status status) {
 static void dfu_on_download_complete(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
-    
+
     dfu_set_state(STATE_DFU_MANIFEST_SYNC);
 }
 
@@ -105,7 +108,6 @@ static void dfu_on_detach_complete(usbd_device* usbd_dev, struct usb_setup_data*
 static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
-
 
     if (DFU_PATCH_VECTORS && current_dfu_offset == 0) {
         if (dfu_download_size < offsetof(vector_table_t, reserved_x001c[1])) {
@@ -144,11 +146,24 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
 static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data* req) {
     (void)usbd_dev;
     (void)req;
+
     if (dfu_manifest_request_callback) {
-        dfu_manifest_request_callback();
-    } else {
-        dfu_set_status(DFU_STATUS_ERR_UNKNOWN);
+        /* The manifestation callback returns a boolean indicating if it succeeded */
+        if (dfu_manifest_request_callback()) {
+            manifestation_complete = true;
+            dfu_set_state(STATE_DFU_MANIFEST_SYNC);
+        } else {
+            dfu_set_status(DFU_STATUS_ERR_FIRMWARE);
+            return; /* Avoid resetting on error */
+        }
     }
+
+#if DFU_WILL_DETACH
+    /* DFU_WILL_DETACH being enabled equates to transitioning to the dfuMANIFEST-WAIT-RESET state,
+     * which combined with bitWillDetach being set with DFU_WILL_DETACH means that the device should
+     * generate a detach-attach sequence and enter the application, i.e. reset itself, here */
+    dfu_on_detach_complete(NULL, NULL);
+#endif
 }
 
 static enum usbd_request_return_codes
@@ -182,11 +197,18 @@ dfu_control_class_request(usbd_device *usbd_dev,
                     break;
                 }
                 case STATE_DFU_MANIFEST_SYNC: {
-                    if (validate_application()) {
+                    /* According to the DFU spec the dfuMANIFEST-SYNC state is entered twice,
+                     * once after the download completes, and again after manifestation if
+                     * the device is manifestation tolerant (DFU_WILL_DETACH == 0) */
+                    if (manifestation_complete) {
+                        /* Only enter idle state after manifestation has completed successfully */
+                        manifestation_complete = false;
+                        dfu_set_state(STATE_DFU_IDLE);
+                    } else {
+                        /* Perform manifestation after download as described in the
+                         * spec regardless of if DFU_WILL_DETACH is enabled or not */
                         dfu_set_state(STATE_DFU_MANIFEST);
                         *complete = &dfu_on_manifest_request;
-                    } else {
-                        dfu_set_status(DFU_STATUS_ERR_FIRMWARE);
                     }
                     break;
                 }
@@ -320,6 +342,10 @@ dfu_control_class_request(usbd_device *usbd_dev,
     return status;
 }
 
+/* Track dfu enumeration status to distinguish between the first USB
+   reset after bootup versus a subsequent USB reset and re-enumeration */
+static bool dfu_enumerated = false;
+
 static void dfu_set_config(usbd_device* usbd_dev, uint16_t wValue) {
     (void)wValue;
 
@@ -328,16 +354,32 @@ static void dfu_set_config(usbd_device* usbd_dev, uint16_t wValue) {
         USB_REQ_TYPE_CLASS | USB_REQ_TYPE_INTERFACE,
         USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
         dfu_control_class_request);
+
+    dfu_enumerated = true;
+}
+
+static void dfu_on_usb_reset(void) {
+    /* Ignore all USB resets until the DFU control callback has been registered, since
+     * reset callback will fire once as the USB connection is established. Without this
+     * the target enters a reset loop when trying to enter the bootloader. */
+    if (!dfu_enumerated) {
+        return;
+    }
+
+    /* Perform a DFU detach (which resets the target), this enables issuing a USB bus
+     * reset as an alternative means to submitting a DFU_DETACH command post-download. */
+    dfu_on_detach_complete(NULL, NULL);
 }
 
 void dfu_setup(usbd_device* usbd_dev,
-               GenericCallback on_manifest_request,
+               ManifestationCallback on_manifest_request,
                StateChangeCallback on_state_change,
                StatusChangeCallback on_status_change) {
     dfu_manifest_request_callback = on_manifest_request;
     dfu_state_change_callback = on_state_change;
     dfu_status_change_callback = on_status_change;
 
+    usbd_register_reset_callback(usbd_dev, dfu_on_usb_reset);
     usbd_register_set_config_callback(usbd_dev, dfu_set_config);
     current_dfu_state = STATE_DFU_IDLE;
     current_dfu_status = DFU_STATUS_OK;
