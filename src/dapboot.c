@@ -32,10 +32,7 @@ static inline void __set_MSP(uint32_t topOfMainStack) {
 }
 
 bool validate_application(void) {
-    if (((uint32_t)(APP_INITIAL_STACK) & 0x2FFE0000) == 0x20000000) {
-        return true;
-    }
-    return false;
+    return ((uint32_t)(APP_INITIAL_STACK) & 0x2FFE0000) == 0x20000000;
 }
 
 static void jump_to_application(void) __attribute__ ((noreturn));
@@ -75,7 +72,7 @@ int main(void) {
         }
 
         usbd_device* usbd_dev = usb_setup();
-        dfu_setup(usbd_dev, target_manifest_app, NULL, NULL);
+        dfu_setup(usbd_dev, validate_application, NULL, NULL);
         webusb_setup(usbd_dev);
         winusb_setup(usbd_dev);
         

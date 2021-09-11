@@ -51,13 +51,13 @@ static enum dfu_state current_dfu_state;
 static enum dfu_status current_dfu_status;
 static size_t current_dfu_offset;
 
-static bool dfu_modified_firmware = false;
+static bool manifestation_complete = false;
 
 static uint8_t dfu_download_buffer[USB_CONTROL_BUF_SIZE];
 static size_t dfu_download_size;
 
 /* User callbacks */
-static GenericCallback dfu_manifest_request_callback = NULL;
+static ManifestationCallback dfu_manifest_request_callback = NULL;
 static StateChangeCallback dfu_state_change_callback = NULL;
 static StatusChangeCallback dfu_status_change_callback = NULL;
 
@@ -133,9 +133,6 @@ static void dfu_on_download_request(usbd_device* usbd_dev, struct usb_setup_data
     bool ok = target_flash_program_array(dest, data, dfu_download_size/2);
     target_flash_lock();
 
-    /* Record that we touched the application firmware */
-    dfu_modified_firmware = true;
-
     if (ok) {
         current_dfu_offset += dfu_download_size;
         /* We could go back to STATE_DFU_DNLOAD_SYNC, but then
@@ -151,12 +148,22 @@ static void dfu_on_manifest_request(usbd_device* usbd_dev, struct usb_setup_data
     (void)req;
 
     if (dfu_manifest_request_callback) {
-        dfu_manifest_request_callback();
+        /* The manifestation callback returns a boolean indicating if it succeeded */
+        if (dfu_manifest_request_callback()) {
+            manifestation_complete = true;
+            dfu_set_state(STATE_DFU_MANIFEST_SYNC);
+        } else {
+            dfu_set_status(DFU_STATUS_ERR_FIRMWARE);
+            return; /* Avoid resetting on error */
+        }
     }
 
-    /* Reset and maybe launch the application if the manifest callback
-       didn't already do it */
-    scb_reset_system();
+#if DFU_WILL_DETACH
+    /* DFU_WILL_DETACH being enabled equates to transitioning to the dfuMANIFEST-WAIT-RESET state,
+     * which combined with bitWillDetach being set with DFU_WILL_DETACH means that the device should
+     * generate a detach-attach sequence and enter the application, i.e. reset itself, here */
+    dfu_on_detach_complete(NULL, NULL);
+#endif
 }
 
 static enum usbd_request_return_codes
@@ -190,17 +197,18 @@ dfu_control_class_request(usbd_device *usbd_dev,
                     break;
                 }
                 case STATE_DFU_MANIFEST_SYNC: {
-                    if (validate_application()) {
-#if DFU_WILL_DETACH
-                        /* Manifest by resetting after responding */
+                    /* According to the DFU spec the dfuMANIFEST-SYNC state is entered twice,
+                     * once after the download completes, and again after manifestation if
+                     * the device is manifestation tolerant (DFU_WILL_DETACH == 0) */
+                    if (manifestation_complete) {
+                        /* Only enter idle state after manifestation has completed successfully */
+                        manifestation_complete = false;
+                        dfu_set_state(STATE_DFU_IDLE);
+                    } else {
+                        /* Perform manifestation after download as described in the
+                         * spec regardless of if DFU_WILL_DETACH is enabled or not */
                         dfu_set_state(STATE_DFU_MANIFEST);
                         *complete = &dfu_on_manifest_request;
-#else
-                        /* Return to the idle state and await commands */
-                        dfu_set_state(STATE_DFU_IDLE);
-#endif
-                    } else {
-                        dfu_set_status(DFU_STATUS_ERR_FIRMWARE);
                     }
                     break;
                 }
@@ -317,11 +325,7 @@ dfu_control_class_request(usbd_device *usbd_dev,
 #endif
 
         case DFU_DETACH: {
-            if (dfu_modified_firmware) {
-                *complete = &dfu_on_manifest_request;
-            } else {
-                *complete = &dfu_on_detach_complete;
-            }
+            *complete = &dfu_on_detach_complete;
             status = USBD_REQ_HANDLED;
             break;
         }
@@ -355,36 +359,20 @@ static void dfu_set_config(usbd_device* usbd_dev, uint16_t wValue) {
 }
 
 static void dfu_on_usb_reset(void) {
-    /* Ignore the first USB reset after boot, before anyone has had
-       a chance to do anything to the device; otherwise we'd never
-       enter DFU mode when the application is valid */
+    /* Ignore all USB resets until the DFU control callback has been registered, since
+     * reset callback will fire once as the USB connection is established. Without this
+     * the target enters a reset loop when trying to enter the bootloader. */
     if (!dfu_enumerated) {
         return;
     }
 
-    /* On subsequent USB reset requests, either reset/manifest
-       or enter the error state if firmware is invalid, per the spec */
-    if (validate_application()) {
-        if (dfu_modified_firmware) {
-            /* Manifest by resetting after responding */
-            dfu_set_state(STATE_DFU_MANIFEST);
-
-            if (dfu_manifest_request_callback) {
-                dfu_manifest_request_callback();
-            }
-        }
-
-        /* Reset and launch the application if the manifest callback
-           didn't already do it */
-        scb_reset_system();
-    } else {
-        /* Enter the error state and await further commands */
-        dfu_set_status(DFU_STATUS_ERR_FIRMWARE);
-    }
+    /* Perform a DFU detach (which resets the target), this enables issuing a USB bus
+     * reset as an alternative means to submitting a DFU_DETACH command post-download. */
+    dfu_on_detach_complete(NULL, NULL);
 }
 
 void dfu_setup(usbd_device* usbd_dev,
-               GenericCallback on_manifest_request,
+               ManifestationCallback on_manifest_request,
                StateChangeCallback on_state_change,
                StatusChangeCallback on_status_change) {
     dfu_manifest_request_callback = on_manifest_request;
