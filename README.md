@@ -70,7 +70,7 @@ The high memory bootloaders do not use the lower part of the flash, so you only 
 ### Switching to the bootloader
 The bootloader can be built to look for arbitrary patterns, but the default looks for a magic value stored in the RTC backup registers. Writing the magic value and then resetting will run the bootloader instead of the main application.
 
-In version v1.11 and earlier, the bootloader for STM32F103 targets looks for `0x544F` in RTC backup register 1 and `0x4F42` in RTC backup register 0 (together they spell "BOOT" in ASCII). In the current master branch and any subsequent releases, the bootloader will only use RTC backup register 0 and check for `0x4F42` on targets with 16-bit backup registers and `0x544F4F42` on targets with 32-bit backup registers.
+In version v1.11 and earlier, the bootloader for STM32F103 targets looks for `0x544F` in RTC backup register 2 and `0x4F42` in RTC backup register 1 (together they spell "BOOT" in ASCII). From v1.20 on, the bootloader will only use RTC backup register 1 and check for `0x4F42` on targets with 16-bit backup registers and `0x544F4F42` on targets with 32-bit backup registers.
 
 The backup register and bootloader command word can be customized with the `REG_BOOT` and `CMD_BOOT` defines respectively.
 
