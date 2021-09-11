@@ -55,7 +55,13 @@ _Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
                "Incompatible flash size");
 #endif
 
-static const uint32_t CMD_BOOT = 0x544F4F42UL;
+#ifndef REG_BOOT
+#define REG_BOOT BKP1
+#endif
+
+#ifndef CMD_BOOT
+#define CMD_BOOT 0x4F42UL
+#endif
 
 void target_clock_setup(void) {
 #ifdef USE_HSI
@@ -160,13 +166,13 @@ const usbd_driver* target_usb_init(void) {
 bool target_get_force_bootloader(void) {
     bool force = false;
     /* Check the RTC backup register */
-    uint32_t cmd = backup_read(BKP0);
+    uint16_t cmd = backup_read(REG_BOOT);
     if (cmd == CMD_BOOT) {
         force = true;
     }
 
     /* Clear the RTC backup register */
-    backup_write(BKP0, 0);
+    backup_write(REG_BOOT, 0);
 
 #if HAVE_BUTTON
     /* Wait some time in case the button has some debounce capacitor */

@@ -27,8 +27,15 @@
 #include "config.h"
 #include "backup.h"
 
+#ifndef REG_BOOT
+#define REG_BOOT BKP1
+#endif
+
+#ifndef CMD_BOOT
+#define CMD_BOOT 0x544F4F42UL
+#endif
+
 //#define CMD_FAST_BOOT 0xfa57b007
-static const uint32_t CMD_BOOT = 0x544F4F42UL;
 
 void target_clock_setup(void) {
 
@@ -82,11 +89,11 @@ const usbd_driver* target_usb_init(void)
 bool target_get_force_bootloader(void)
 {
 	bool enter_bl = false;
-	uint32_t cmd = backup_read(BKP0);
+	uint32_t cmd = backup_read(REG_BOOT);
 	if (cmd == CMD_BOOT) {
 		enter_bl = true;
 	}
-	backup_write(BKP0, 0);
+	backup_write(REG_BOOT, 0);
 
 #if HAVE_BUTTON
 #warning HAVE_BUTTON not implemented for L1
