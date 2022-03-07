@@ -36,6 +36,7 @@ extern void target_flash_lock(void);
 extern bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t half_word_count);
 
 extern void target_pre_main(void);
+extern void target_post_setup(void);
 extern void target_pre_detach(bool manifested);
 extern size_t target_get_timeout(void);
 

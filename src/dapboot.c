@@ -75,7 +75,8 @@ int main(void) {
         dfu_setup(usbd_dev, validate_application, NULL, NULL);
         webusb_setup(usbd_dev);
         winusb_setup(usbd_dev);
-        
+        target_post_setup();
+
         while (1) {
             usbd_poll(usbd_dev);
         }
