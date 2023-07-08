@@ -22,7 +22,6 @@ To build other targets, you can override the
 |`OLIMEXSTM32H103` | Olimex STM32-H103 | https://www.olimex.com/Products/ARM/ST/STM32-H103/ |
 |`BLUEPILLPLUSSTM32` | Bluepill with USB C | https://github.com/WeActTC/BluePill-Plus/ |
 |`BTTSKRMINIE3V2` | BigTreeTech SKR MINI E3 V2.0 (3D printer motherboard) | https://github.com/bigtreetech/BIGTREETECH-SKR-mini-E3 |
-|`BTTSKRMINIE3V2_USBMOD` | BTT SKR MINI E3 V2.0 with USB pullup removed | https://github.com/bigtreetech/BIGTREETECH-SKR-mini-E3 |
 
 For the above targets there are some potential variants that can be added to the target name based on what the target supports:
 

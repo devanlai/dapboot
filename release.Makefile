@@ -35,7 +35,6 @@ all: dapboot-bluepill.bin \
      dapboot-olimexstm32h103.bin \
      dapboot-bluepillplusstm32.bin \
      dapboot-bttskrminie3v2.bin \
-     dapboot-bttskrminie3v2-usbmod.bin \
      dapboot-bluepill-high.bin \
      dapboot-maplemini-high.bin \
      dapboot-stlink-high.bin \
@@ -46,8 +45,7 @@ all: dapboot-bluepill.bin \
      dapboot-stlink-high-128.bin \
      dapboot-olimexstm32h103-high-128.bin \
      dapboot-bluepillplusstm32-high-128.bin \
-     dapboot-bttskrminie3v2-high-256.bin \
-     dapboot-bttskrminie3v2-usbmod-high-256.bin
+     dapboot-bttskrminie3v2-high-256.bin
 
 clean:
 	$(Q)$(RM) $(BUILD_DIR)/*.bin
@@ -92,12 +90,6 @@ dapboot-bttskrminie3v2.bin: | $(BUILD_DIR)
 	@printf "  BUILD $(@)\n"
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2 -C src/ clean
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2 -C src/
-	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
-
-dapboot-bttskrminie3v2-usbmod.bin: | $(BUILD_DIR)
-	@printf "  BUILD $(@)\n"
-	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2_USBMOD -C src/ clean
-	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2_USBMOD -C src/
 	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
 
 dapboot-bluepill-high.bin: | $(BUILD_DIR)
@@ -164,10 +156,4 @@ dapboot-bttskrminie3v2-high-256.bin: | $(BUILD_DIR)
 	@printf "  BUILD $(@)\n"
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2_HIGH_256 -C src/ clean
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2_HIGH_256 -C src/
-	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
-
-dapboot-bttskrminie3v2-usbmod-high-256.bin: | $(BUILD_DIR)
-	@printf "  BUILD $(@)\n"
-	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2_USBMOD_HIGH_256 -C src/ clean
-	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2_USBMOD_HIGH_256 -C src/
 	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
