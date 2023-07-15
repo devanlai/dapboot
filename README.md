@@ -9,6 +9,7 @@ The default target is a generic STM32F103 dev board with an LED on PC13, commonl
 To build other targets, you can override the
 `TARGET` variable when invoking `make`.
 
+    cd src/
     make clean
     make TARGET=STLINK
 
@@ -26,14 +27,14 @@ To build other targets, you can override the
 
 For the above targets there are some potential variants that can be added to the target name based on what the target supports:
 
-| Target Variant | Description                                           |
-| -------------- | ----------------------------------------------------- |
-|` `             | Standard bootloader, using first 8kB of flash         |
-|`_HIGH`         | High memory bootloader for 64kB chips  (experimental) |
-|`_HIGH_128`     | High memory bootloader for 128kB chips (experimental) |
-|`_HIGH_256`     | High memory bootloader for 256kB chips (experimental) |
+| Target Variant | Description                                             |
+| -------------- | ------------------------------------------------------- |
+|` `             | Standard bootloader, using first 8 KiB of flash         |
+|`_HIGH`         | High memory bootloader for 64 KiB chips  (experimental) |
+|`_HIGH_128`     | High memory bootloader for 128 KiB chips (experimental) |
+|`_HIGH_256`     | High memory bootloader for 256 KiB chips (experimental) |
 
-The high memory bootloader is a variation that doesn't require the application to be at an offset, the bootloader resides in the top 6.5kB of ROM and hides its reset and stack vectors inside unused entries of the application vector table. As an example, to compile for a Bluepill board with 128kB flash, use:
+The high memory bootloader is a variation that doesn't require the application to be at an offset, the bootloader resides in the top 7 KiB of ROM and hides its reset and stack vectors inside unused entries of the application vector table. As an example, to compile for a Bluepill board with 128 KiB flash, use:
 
     make clean
     make TARGET=BLUEPILL_HIGH_128
@@ -64,7 +65,7 @@ You can also use the env variable `DEFS` to override default configuration for a
 ### Building for the bootloader
 The standard bootloader occupies the lower 8KiB of flash, so your application must offset its flash contents by 8KiB. This can be done by modifying your linker script or flags as appropriate.
 
-The high memory bootloaders do not use the lower part of the flash, so you only need to make sure your application leaves 6.5kB of flash free.
+The high memory bootloaders do not use the lower part of the flash, so you only need to make sure your application leaves 7 KiB of flash free.
 
 
 ### Switching to the bootloader

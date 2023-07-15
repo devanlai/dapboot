@@ -23,7 +23,7 @@
 MEMORY
 {
 	vectors (rx) : ORIGIN = 0x08000000, LENGTH = 0x150
-	rom (rx)  : ORIGIN = 0x0801e600, LENGTH = 0x1A00
+	rom (rx)  : ORIGIN = 0x0801E400, LENGTH = 0x1C00
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 20K
 }
 
