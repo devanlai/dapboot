@@ -1,0 +1,38 @@
+name: Build Firmware
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Cache Toolchain
+        id: cache-toolchain
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-toolchain
+        with:
+          path: ~/toolchains/
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('util/install-toolchain.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        name: Download toolchain
+        run: ./util/install-toolchain.sh
+
+      - name: Build Firmware
+        run: make -f release.Makefile -k all
+        env:
+          PREFIX: ~/toolchains/gcc-arm-embedded/bin/arm-none-eabi-
+
+      - name: Archive Firmware
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware-bin
+          path: build/*.bin
