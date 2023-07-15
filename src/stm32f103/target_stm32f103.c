@@ -77,15 +77,26 @@ void target_clock_setup(void) {
 
 void target_gpio_setup(void) {
     /* Enable GPIO clocks */
-    if (USES_GPIOA) {
-        rcc_periph_clock_enable(RCC_GPIOA);
+#if USES_GPIOA
+    rcc_periph_clock_enable(RCC_GPIOA);
+#endif
+#if USES_GPIOB
+    rcc_periph_clock_enable(RCC_GPIOB);
+#endif
+#if USES_GPIOC
+    rcc_periph_clock_enable(RCC_GPIOC);
+#endif
+
+    /* Disable SWD if PA13 and/or PA14 are used for another purpose */
+#if ((HAVE_LED && LED_GPIO_PORT == GPIOA && (LED_GPIO_PORT == GPIO13 || LED_GPIO_PORT == GPIO14)) || \
+    (HAVE_BUTTON && BUTTON_GPIO_PORT == GPIOA && (BUTTON_GPIO_PIN == GPIO13 || BUTTON_GPIO_PIN == GPIO14)) || \
+    (HAVE_USB_PULLUP_CONTROL && USB_PULLUP_GPIO_PORT == GPIOA && \
+        (USB_PULLUP_GPIO_PIN == GPIO13 || USB_PULLUP_GPIO_PIN == GPIO14)))
+    {
+        rcc_periph_clock_enable(RCC_AFIO);
+        gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_OFF, 0);
     }
-    if (USES_GPIOB) {
-        rcc_periph_clock_enable(RCC_GPIOB);
-    }
-    if (USES_GPIOC) {
-        rcc_periph_clock_enable(RCC_GPIOC);
-    }
+#endif
 
     /* Setup LEDs */
 #if HAVE_LED
