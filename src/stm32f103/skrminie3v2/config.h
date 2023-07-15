@@ -36,10 +36,18 @@
 #define DFU_WILL_DETACH 0
 #endif
 
-/* There is a PCB-mounted status LED, but it's unreadable when the board is installed,
- * and additionally it's wired to SWDIO so toggling it manually is a bad idea */
+/* STATUS LED */
 #ifndef HAVE_LED
-#define HAVE_LED 0
+#define HAVE_LED 1
+#endif
+#ifndef LED_OPEN_DRAIN
+#define LED_OPEN_DRAIN 0
+#endif
+#ifndef LED_GPIO_PORT
+#define LED_GPIO_PORT GPIOA
+#endif
+#ifndef LED_GPIO_PIN
+#define LED_GPIO_PIN GPIO13
 #endif
 
 /* Display encoder button (BTN-ENC) on PA15, no external pullup */
@@ -82,8 +90,8 @@
 #define USES_GPIOA 1
 #endif
 
-/* For stm32duino bootloader compatibility, the following options enable
- * bootloader flashing using KIAUH: https://github.com/th33xitus/kiauh */
+/* For stm32duino bootloader compatibility, the following options enable bootloader flashing using Klipper:
+ * https://github.com/Klipper3d/klipper/blob/6d48adf9ef5d17632acf53a7e3a07964f6cfd642/src/stm32/stm32f1.c#L238 */
 #ifndef REG_BOOT
 #define REG_BOOT BKP10
 #endif
