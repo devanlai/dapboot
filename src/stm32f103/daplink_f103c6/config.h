@@ -23,7 +23,7 @@
 #define APP_BASE_ADDRESS (0x08000000 + BOOTLOADER_OFFSET)
 #endif
 #ifndef FLASH_SIZE_OVERRIDE
-#define FLASH_SIZE_OVERRIDE 0x20000
+#define FLASH_SIZE_OVERRIDE 0x08000
 #endif
 #ifndef FLASH_PAGE_SIZE
 #define FLASH_PAGE_SIZE  1024
@@ -38,14 +38,15 @@
 #ifndef HAVE_LED
 #define HAVE_LED 1
 #endif
+#define LED_INVERT
 #ifndef LED_OPEN_DRAIN
-#define LED_OPEN_DRAIN 1
+#define LED_OPEN_DRAIN 0
 #endif
 #ifndef LED_GPIO_PORT
 #define LED_GPIO_PORT GPIOB
 #endif
 #ifndef LED_GPIO_PIN
-#define LED_GPIO_PIN GPIO8
+#define LED_GPIO_PIN GPIO12
 #endif
 
 #ifndef HAVE_BUTTON
@@ -69,9 +70,9 @@
 #define HAVE_USB_PULLUP_CONTROL 0
 #endif
 
-//#ifndef USES_GPIOB
-//#define USES_GPIOB 1
-//#endif
+#ifndef USES_GPIOB
+#define USES_GPIOB 1
+#endif
 //
 //#ifndef USES_GPIOC
 //#define USES_GPIOC 1

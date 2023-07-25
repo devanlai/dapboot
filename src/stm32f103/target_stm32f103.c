@@ -105,10 +105,17 @@ void target_gpio_setup(void) {
         const uint8_t conf = (LED_OPEN_DRAIN ? GPIO_CNF_OUTPUT_OPENDRAIN
                                              : GPIO_CNF_OUTPUT_PUSHPULL);
         if (LED_OPEN_DRAIN) {
+#ifdef LED_INVERT
+            gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
+        } else {
+            gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
+        }
+#else
             gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
         } else {
             gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
         }
+#endif
         gpio_set_mode(LED_GPIO_PORT, mode, conf, LED_GPIO_PIN);
     }
 #endif
