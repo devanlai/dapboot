@@ -69,4 +69,8 @@
 #define HAVE_USB_PULLUP_CONTROL 0
 #endif
 
+#ifndef USES_HSE_12M
+#define USES_HSE_12M 0
+#endif
+
 #endif

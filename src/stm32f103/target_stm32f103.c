@@ -70,12 +70,26 @@ void target_clock_setup(void) {
        it's better than nothing. */
     rcc_clock_setup_in_hsi_out_48mhz();
 #else
+    /* Set system clock to 72 MHz from an external crystal */
 #ifdef USES_HSE_12M
     rcc_clock_setup_in_hse_12mhz_out_72mhz();
 #else
-    /* Set system clock to 72 MHz from an external crystal */
     rcc_clock_setup_in_hse_8mhz_out_72mhz();
 #endif
+
+#endif
+}
+
+void target_pre_main(void) {
+    /* At least disable LEDs */
+#if HAVE_LED
+    {
+        if (LED_OPEN_DRAIN || LED_ACTIVE_HIGH) {
+            gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
+        } else {
+            gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
+        }
+    }
 #endif
 }
 
@@ -102,6 +116,7 @@ void target_gpio_setup(void) {
     }
 #endif
 
+    /* Disable JTAG if PA15 are used for another purpose */
 #if (HAVE_USB_PULLUP_CONTROL && USB_PULLUP_GPIO_PORT == GPIOA && \
         (USB_PULLUP_GPIO_PIN == GPIO15))
     {

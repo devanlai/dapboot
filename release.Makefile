@@ -36,6 +36,7 @@ all: dapboot-bluepill.bin \
      dapboot-bluepillplusstm32.bin \
      dapboot-bttskrminie3v2.bin \
      dapboot-bluepill-high.bin \
+     dapboot-koshin.bin \
      dapboot-maplemini-high.bin \
      dapboot-stlink-high.bin \
      dapboot-olimexstm32h103-high.bin \
@@ -156,4 +157,10 @@ dapboot-bttskrminie3v2-high-256.bin: | $(BUILD_DIR)
 	@printf "  BUILD $(@)\n"
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2_HIGH_256 -C src/ clean
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2_HIGH_256 -C src/
+	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+
+dapboot-koshin.bin: | $(BUILD_DIR)
+	@printf "  BUILD $(@)\n"
+	$(Q)$(MAKE) TARGET=KOSHIN -C src/ clean
+	$(Q)$(MAKE) TARGET=KOSHIN -C src/
 	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)

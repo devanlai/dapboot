@@ -38,6 +38,9 @@
 #ifndef HAVE_LED
 #define HAVE_LED 1
 #endif
+#ifndef LED_ACTIVE_HIGH
+#define LED_ACTIVE_HIGH 0
+#endif
 #ifndef LED_OPEN_DRAIN
 #define LED_OPEN_DRAIN 0
 #endif
@@ -76,6 +79,11 @@
 #endif
 #ifndef USES_GPIOB
 #define USES_GPIOB 1
+#endif
+
+
+#ifndef USES_HSE_12M
+#define USES_HSE_12M 0
 #endif
 
 #endif
