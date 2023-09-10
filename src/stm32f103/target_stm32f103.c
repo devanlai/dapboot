@@ -70,8 +70,12 @@ void target_clock_setup(void) {
        it's better than nothing. */
     rcc_clock_setup_in_hsi_out_48mhz();
 #else
+#ifdef USES_HSE_12M
+    rcc_clock_setup_in_hse_12mhz_out_72mhz();
+#else
     /* Set system clock to 72 MHz from an external crystal */
     rcc_clock_setup_in_hse_8mhz_out_72mhz();
+#endif
 #endif
 }
 
@@ -98,13 +102,20 @@ void target_gpio_setup(void) {
     }
 #endif
 
+#if (HAVE_USB_PULLUP_CONTROL && USB_PULLUP_GPIO_PORT == GPIOA && \
+        (USB_PULLUP_GPIO_PIN == GPIO15))
+    {
+        rcc_periph_clock_enable(RCC_AFIO);
+        AFIO_MAPR |= AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON;
+    }
+#endif
     /* Setup LEDs */
 #if HAVE_LED
     {
         const uint8_t mode = GPIO_MODE_OUTPUT_10_MHZ;
         const uint8_t conf = (LED_OPEN_DRAIN ? GPIO_CNF_OUTPUT_OPENDRAIN
                                              : GPIO_CNF_OUTPUT_PUSHPULL);
-        if (LED_OPEN_DRAIN) {
+        if (LED_OPEN_DRAIN || LED_ACTIVE_HIGH) {
             gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
         } else {
             gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
