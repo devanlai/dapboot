@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Devan Lai
+ * Copyright (c) 2023, Xiaoyu Hong
  *
  * Permission to use, copy, modify, and/or distribute this software
  * for any purpose with or without fee is hereby granted, provided
@@ -39,16 +39,16 @@
 #define HAVE_LED 1
 #endif
 #ifndef LED_ACTIVE_HIGH
-#define LED_ACTIVE_HIGH 0
+#define LED_ACTIVE_HIGH 1
 #endif
 #ifndef LED_OPEN_DRAIN
-#define LED_OPEN_DRAIN 1
+#define LED_OPEN_DRAIN 0
 #endif
 #ifndef LED_GPIO_PORT
-#define LED_GPIO_PORT GPIOC
+#define LED_GPIO_PORT GPIOB
 #endif
 #ifndef LED_GPIO_PIN
-#define LED_GPIO_PIN GPIO13
+#define LED_GPIO_PIN GPIO5
 #endif
 
 #ifndef HAVE_BUTTON
@@ -63,7 +63,7 @@
 #ifndef BUTTON_GPIO_PIN
 #define BUTTON_GPIO_PIN GPIO2
 #endif
-// Blue-Pull has 100k resistors on PB2, so we can't use weak pulls to read it.
+
 #ifndef BUTTON_USES_PULL
 #define BUTTON_USES_PULL 0
 #endif
@@ -73,7 +73,23 @@
 #endif
 
 #ifndef HAVE_USB_PULLUP_CONTROL
-#define HAVE_USB_PULLUP_CONTROL 0
+#define HAVE_USB_PULLUP_CONTROL 1
+#endif
+#ifndef USB_PULLUP_GPIO_PORT
+#define USB_PULLUP_GPIO_PORT GPIOA
+#endif
+#ifndef USB_PULLUP_GPIO_PIN
+#define USB_PULLUP_GPIO_PIN  GPIO15
+#endif
+#ifndef USB_PULLUP_ACTIVE_HIGH
+#define USB_PULLUP_ACTIVE_HIGH 1
+#endif
+#ifndef USB_PULLUP_OPEN_DRAIN
+#define USB_PULLUP_OPEN_DRAIN 0
+#endif
+
+#ifndef USES_GPIOA
+#define USES_GPIOA 1
 #endif
 
 #ifndef USES_GPIOB
@@ -84,9 +100,8 @@
 #define USES_GPIOC 1
 #endif
 
-
 #ifndef USES_HSE_12M
-#define USES_HSE_12M 0
+#define USES_HSE_12M 1
 #endif
 
 #endif

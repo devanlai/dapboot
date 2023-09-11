@@ -38,6 +38,9 @@
 #ifndef HAVE_LED
 #define HAVE_LED 1
 #endif
+#ifndef LED_ACTIVE_HIGH
+#define LED_ACTIVE_HIGH 0
+#endif
 #ifndef LED_GPIO_PORT
 #define LED_GPIO_PORT GPIOA
 #endif
@@ -58,6 +61,10 @@
 
 #ifndef USES_GPIOA
 #define USES_GPIOA 1
+#endif
+
+#ifndef USES_HSE_12M
+#define USES_HSE_12M 0
 #endif
 
 #endif
