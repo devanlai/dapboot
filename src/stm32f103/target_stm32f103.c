@@ -50,6 +50,10 @@
 #define BUTTON_USES_PULL 1
 #endif
 
+#ifndef LED_ACTIVE_HIGH
+#define LED_ACTIVE_HIGH 0
+#endif
+
 #ifdef FLASH_SIZE_OVERRIDE
 _Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
                "Incompatible flash size");
@@ -107,7 +111,11 @@ void target_gpio_setup(void) {
         if (LED_OPEN_DRAIN) {
             gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
         } else {
-            gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
+            if (LED_ACTIVE_HIGH) {
+                gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
+            } else {
+                gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
+            }
         }
         gpio_set_mode(LED_GPIO_PORT, mode, conf, LED_GPIO_PIN);
     }
