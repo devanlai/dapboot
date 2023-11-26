@@ -35,6 +35,7 @@ all: dapboot-bluepill.bin \
      dapboot-olimexstm32h103.bin \
      dapboot-bluepillplusstm32.bin \
      dapboot-bttskrminie3v2.bin \
+     dapboot-shinelanx.bin \
      dapboot-bluepill-high.bin \
      dapboot-maplemini-high.bin \
      dapboot-stlink-high.bin \
@@ -90,6 +91,12 @@ dapboot-bttskrminie3v2.bin: | $(BUILD_DIR)
 	@printf "  BUILD $(@)\n"
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2 -C src/ clean
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2 -C src/
+	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+
+dapboot-shinelanx.bin: | $(BUILD_DIR)
+	@printf "  BUILD $(@)\n"
+	$(Q)$(MAKE) TARGET=SHINELANX -C src/ clean
+	$(Q)$(MAKE) TARGET=SHINELANX -C src/
 	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
 
 dapboot-bluepill-high.bin: | $(BUILD_DIR)
