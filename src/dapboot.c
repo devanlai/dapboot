@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <libopencm3/cm3/vector.h>
+#include <libopencm3/cm3/systick.h>
 
 #include "dapboot.h"
 #include "target.h"
@@ -61,6 +62,13 @@ int main(void) {
 
     /* Initialize GPIO/LEDs if needed */
     target_gpio_setup();
+
+#if HAVE_LED
+    systick_set_clocksource(STK_CSR_CLKSOURCE_AHB_DIV8);
+    systick_set_reload(899999);
+    systick_interrupt_enable();
+    systick_counter_enable();
+#endif
 
     if (target_get_force_bootloader() || !validate_application()) {
         /* Setup USB */

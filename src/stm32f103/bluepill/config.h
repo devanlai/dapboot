@@ -81,4 +81,8 @@
 #define USES_GPIOC 1
 #endif
 
+#ifndef LED_INVERT
+#define LED_INVERT 1
+#endif
+
 #endif

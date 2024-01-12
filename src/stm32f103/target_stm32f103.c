@@ -101,7 +101,7 @@ void target_gpio_setup(void) {
     /* Setup LEDs */
 #if HAVE_LED
     {
-        const uint8_t mode = GPIO_MODE_OUTPUT_10_MHZ;
+        const uint8_t mode = GPIO_MODE_OUTPUT_2_MHZ;
         const uint8_t conf = (LED_OPEN_DRAIN ? GPIO_CNF_OUTPUT_OPENDRAIN
                                              : GPIO_CNF_OUTPUT_PUSHPULL);
         if (LED_OPEN_DRAIN) {
