@@ -24,8 +24,12 @@
 #include <libopencm3/stm32/flash.h>
 #include <libopencm3/stm32/desig.h>
 #include <libopencm3/cm3/scb.h>
+#include <libopencm3/cm3/vector.h>
+#include <libopencm3/stm32/gpio.h>
+#include <libopencm3/cm3/systick.h>
 
 #include "dapboot.h"
+#include "dfu.h"
 #include "target.h"
 #include "config.h"
 #include "backup.h"
@@ -110,6 +114,12 @@ void target_gpio_setup(void) {
             gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
         }
         gpio_set_mode(LED_GPIO_PORT, mode, conf, LED_GPIO_PIN);
+
+	/* add systick for LED blinking */
+        systick_set_clocksource(STK_CSR_CLKSOURCE_AHB_DIV8);
+        systick_set_reload(899999);
+        systick_interrupt_enable();
+        systick_counter_enable();
     }
 #endif
 
@@ -276,3 +286,16 @@ bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t hal
 
     return verified;
 }
+
+#if HAVE_LED
+void sys_tick_handler(void)
+{
+    static uint8_t count = 0 ;
+    count ++;
+    if ( count >= ( dfu_is_idle() ? 5 : 1 ) ){
+        count = 0;
+        gpio_toggle(LED_GPIO_PORT, LED_GPIO_PIN);
+    }
+}
+
+#endif
