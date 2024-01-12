@@ -58,6 +58,7 @@ DEFS           ?= -DSTM32F0
 FP_FLAGS       ?= -msoft-float
 ARCH_FLAGS     ?= -mthumb -mcpu=cortex-m0 $(FP_FLAGS)
 OPENCM3_TARGET ?= "stm32/f0"
+FLASH_SIZE     ?= 8192
 
 ####################################################################
 # Semihosting support
@@ -177,6 +178,10 @@ locm3: $(LIB_DIR)/lib$(LIBNAME).a
 
 %.images: %.bin %.hex %.srec %.list %.map
 	@#printf "*** $* images generated ***\n"
+
+%_full.bin: %.bin
+	@#printf "  Padding binary to full size"
+	$(Q)dd if=/dev/zero bs=1 count=$$(expr $(FLASH_SIZE) - $$(stat --print "%s" $< )) status=none | LC_CTYPE=C tr '\0' '\377' | cat $< - > $@
 
 %.bin: %.elf
 	@#printf "  OBJCOPY $(*).bin\n"

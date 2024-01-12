@@ -23,6 +23,7 @@
 #include <libopencm3/cm3/vector.h>
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/dfu.h>
+#include <libopencm3/stm32/gpio.h>
 
 #include "config.h"
 #include "usb_conf.h"
@@ -395,3 +396,16 @@ void dfu_setup(usbd_device* usbd_dev,
         on_state_change(current_dfu_state);
     }
 }
+
+#if HAVE_LED
+void sys_tick_handler(void)
+{
+    static uint8_t count = 0 ;
+    count ++;
+    if ( count >= ( ( current_dfu_state == STATE_DFU_IDLE ) ? 5 : 1 ) ){
+        count = 0;
+        gpio_toggle(LED_GPIO_PORT, LED_GPIO_PIN);
+    }
+}
+
+#endif

@@ -146,6 +146,12 @@ ifeq ($(TARGET),STM32L1_GENERIC)
 	ARCH			= STM32L1
 	DEFS			+= -DNDEBUG
 endif
+ifeq ($(TARGET),DAPLINK_F103C6)
+	TARGET_COMMON_DIR	:= ./stm32f103
+	TARGET_SPEC_DIR		:= ./stm32f103/daplink_f103c6
+	LDSCRIPT		:= ./stm32f103/stm32f103x6.ld
+	ARCH			= STM32F1
+endif
 
 ifndef ARCH
 $(error Unknown target $(TARGET))

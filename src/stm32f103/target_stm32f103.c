@@ -101,14 +101,21 @@ void target_gpio_setup(void) {
     /* Setup LEDs */
 #if HAVE_LED
     {
-        const uint8_t mode = GPIO_MODE_OUTPUT_10_MHZ;
+        const uint8_t mode = GPIO_MODE_OUTPUT_2_MHZ;
         const uint8_t conf = (LED_OPEN_DRAIN ? GPIO_CNF_OUTPUT_OPENDRAIN
                                              : GPIO_CNF_OUTPUT_PUSHPULL);
         if (LED_OPEN_DRAIN) {
+#ifdef LED_INVERT
+            gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
+        } else {
+            gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
+        }
+#else
             gpio_set(LED_GPIO_PORT, LED_GPIO_PIN);
         } else {
             gpio_clear(LED_GPIO_PORT, LED_GPIO_PIN);
         }
+#endif
         gpio_set_mode(LED_GPIO_PORT, mode, conf, LED_GPIO_PIN);
     }
 #endif

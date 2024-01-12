@@ -35,6 +35,7 @@ all: dapboot-bluepill.bin \
      dapboot-olimexstm32h103.bin \
      dapboot-bluepillplusstm32.bin \
      dapboot-bttskrminie3v2.bin \
+     dapboot-daplink_f103c6.bin \
      dapboot-bluepill-high.bin \
      dapboot-maplemini-high.bin \
      dapboot-stlink-high.bin \
@@ -91,6 +92,13 @@ dapboot-bttskrminie3v2.bin: | $(BUILD_DIR)
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2 -C src/ clean
 	$(Q)$(MAKE) TARGET=BTTSKRMINIE3V2 -C src/
 	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+
+dapboot-daplink_f103c6.bin: | $(BUILD_DIR)
+	@printf "  BUILD $(@)\n"
+	$(Q)$(MAKE) TARGET=DAPLINK_F103C6 -C src/ clean
+	$(Q)$(MAKE) TARGET=DAPLINK_F103C6 -C src/ dapboot_full.bin
+	$(Q)cp src/dapboot.bin $(BUILD_DIR)/$(@)
+	$(Q)cp src/dapboot_full.bin $(BUILD_DIR)/$$(echo $@|sed -e 's/.bin/_full.bin/')
 
 dapboot-bluepill-high.bin: | $(BUILD_DIR)
 	@printf "  BUILD $(@)\n"
