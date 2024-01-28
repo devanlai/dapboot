@@ -1,0 +1,11 @@
+#ifndef _FLASH_CH_F1_H_
+#define _FLASH_CH_F1_H_
+
+#define FLASH_MODEKEYP		MMIO32(FLASH_MEM_INTERFACE_BASE + 0x24)
+
+#define FLASH_CR_PAGE_PROGRAM	(1<<16)
+#define FLASH_CR_PAGE_ERASE	(1<<17)
+#define FLASH_CR_BUF_LOAD	(1<<18)
+#define FLASH_CR_BUF_RST	(1<<19)
+
+#endif

@@ -395,3 +395,7 @@ void dfu_setup(usbd_device* usbd_dev,
         on_state_change(current_dfu_state);
     }
 }
+
+bool dfu_is_idle(void){
+    return current_dfu_state == STATE_DFU_IDLE;
+}
