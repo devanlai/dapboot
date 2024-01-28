@@ -38,4 +38,6 @@ extern void dfu_setup(usbd_device* usbd_dev,
                       StateChangeCallback on_state_change,
                       StatusChangeCallback on_status_change);
 
+bool dfu_is_idle (void);
+
 #endif
