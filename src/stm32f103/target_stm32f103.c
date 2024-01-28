@@ -27,6 +27,7 @@
 #include <libopencm3/cm3/vector.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/cm3/systick.h>
+#include "flash_wch_ext.h"
 
 #include "dapboot.h"
 #include "dfu.h"
@@ -66,6 +67,10 @@ _Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
 #ifndef CMD_BOOT
 #define CMD_BOOT 0x4F42UL
 #endif
+
+
+void target_flash_erase_page(uint32_t adr);
+bool target_flash_page ( uint32_t *adr, size_t sz, const uint16_t *buf);
 
 void target_clock_setup(void) {
 #ifdef USE_HSI
@@ -115,7 +120,7 @@ void target_gpio_setup(void) {
         }
         gpio_set_mode(LED_GPIO_PORT, mode, conf, LED_GPIO_PIN);
 
-	/* add systick for LED blinking */
+        /* add systick for LED blinking */
         systick_set_clocksource(STK_CSR_CLKSOURCE_AHB_DIV8);
         systick_set_reload(899999);
         systick_interrupt_enable();
@@ -241,6 +246,94 @@ void target_relocate_vector_table(void) {
     SCB_VTOR = APP_BASE_ADDRESS & 0xFFFF;
 }
 
+#if defined(CH32F1) && (CH32F1 == 1)
+void target_flash_unlock(void){
+    FLASH_KEYR = FLASH_KEYR_KEY1;
+    FLASH_KEYR = FLASH_KEYR_KEY2;
+    FLASH_MODEKEYP = FLASH_KEYR_KEY1;
+    FLASH_MODEKEYP = FLASH_KEYR_KEY2;
+}
+
+void target_flash_lock(void) {
+    FLASH_CR |= FLASH_CR_LOCK;
+}
+
+void target_flash_erase_page(uint32_t adr) {
+    adr &= ~(0x7f);
+    FLASH_CR |= FLASH_CR_PAGE_ERASE;
+    FLASH_AR = adr;
+    FLASH_CR |= FLASH_CR_STRT;
+    while ( FLASH_SR & FLASH_SR_BSY ) { }
+    FLASH_CR &= ~FLASH_CR_PAGE_ERASE;
+    *(volatile uint32_t*)0x40022034 = *(volatile uint32_t*)(adr^ 0x00000100);    // taken from example
+}
+
+bool target_flash_page ( uint32_t *adr, size_t sz, const uint16_t *buf) {
+    /* if not aligned return false */
+    uint32_t    prg_adr = (uint32_t) adr;
+    if ( (prg_adr & 0x7f) != 0 ) return false;
+    if ( sz > 64 ) return false;          // should less than 128byte
+    FLASH_CR |= FLASH_CR_PAGE_PROGRAM;    // enable page programing
+    FLASH_CR |= FLASH_CR_BUF_RST;         // page buffer reset
+    while ( FLASH_SR & FLASH_SR_BSY );
+    FLASH_CR &= ~FLASH_CR_PAGE_PROGRAM;
+
+    while (sz) {
+        uint32_t cnt = 4;
+        FLASH_CR |= FLASH_CR_PAGE_PROGRAM;    // enable page programing
+        uint32_t    s_adr = (uint32_t) adr;
+        while ( (sz > 1) && cnt ) {
+            *adr = * ((uint32_t *)buf);
+            adr ++;
+            buf += 2;
+            sz -= 2;
+            cnt --;
+        }
+        if ( (sz != 0) && cnt ) {
+            *adr = 0xffff0000 | (*buf);
+            adr ++;
+            buf ++;
+            sz --;
+            cnt --;
+        }
+        FLASH_CR |= FLASH_CR_BUF_LOAD;
+        while ( FLASH_SR & FLASH_SR_BSY );
+        FLASH_CR &= ~FLASH_CR_PAGE_PROGRAM;
+        *(volatile uint32_t*)0x40022034 = *(volatile uint32_t*)(s_adr ^ 0x00000100);    // taken from example
+    }
+
+    FLASH_CR |= FLASH_CR_PAGE_PROGRAM;    // enable page programing
+    FLASH_AR = prg_adr;
+    FLASH_CR |= FLASH_CR_STRT;
+    while ( FLASH_SR & FLASH_SR_BSY );
+    FLASH_CR &= ~FLASH_CR_PAGE_PROGRAM;
+    *(volatile uint32_t*)0x40022034 = *(volatile uint32_t*)(prg_adr ^ 0x00000100);      // taken from example
+    if ( FLASH_SR  & (FLASH_SR_PGERR | FLASH_SR_WRPRTERR) ) {
+        FLASH_SR  |= FLASH_SR_PGERR | FLASH_SR_WRPRTERR;
+        return false;
+    }
+    return true;
+}
+
+bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t half_word_count) {
+    size_t    cnt;
+
+    if (  ( ((uint32_t) dest ) & 0x7f ) != 0 ) return false;
+
+    for ( cnt = 0; cnt < half_word_count ; cnt+=64 ){
+        uint32_t ptr = cnt*2 + ((uint32_t) dest);
+        size_t sz = half_word_count -cnt;
+        if ( sz > 64) sz = 64;
+        target_flash_erase_page( ptr );
+        if (  ! target_flash_page( (uint32_t *) ptr, sz, data + cnt ) ) return false;
+        for ( uint32_t i = 0; i < sz; i++) if ( dest[cnt+i] != data[cnt+i]) return false;
+    }
+
+    return true;
+}
+
+#else
+
 void target_flash_unlock(void) {
     flash_unlock();
 }
@@ -286,6 +379,7 @@ bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t hal
 
     return verified;
 }
+#endif
 
 #if HAVE_LED
 void sys_tick_handler(void)
