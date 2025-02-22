@@ -32,7 +32,7 @@ jobs:
           PREFIX: ~/toolchains/gcc-arm-embedded/bin/arm-none-eabi-
 
       - name: Archive Firmware
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: firmware-bin
           path: build/*.bin
